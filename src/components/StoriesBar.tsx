@@ -17,7 +17,6 @@ export default function StoriesBar({ posts, onSelectPost }: StoriesBarProps) {
   return (
     <div className="stories-bar-container" style={{
       width: "100%",
-      padding: "1rem 2rem",
       display: "flex",
       gap: "1.25rem",
       overflowX: "auto",

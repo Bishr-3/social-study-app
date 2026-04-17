@@ -219,7 +219,7 @@ export default function PostDetailClient({ initialPost }: { initialPost: Post })
           </div>
         )}
 
-        <article className="glass-card" style={{ padding: "2.5rem" }}>
+        <article className="glass-card post-article">
           <div className="admin-cover-edit" style={{ marginBottom: "2rem" }}>
             {isEditing ? (
               <div style={{ textAlign: "center" }}>
@@ -241,13 +241,12 @@ export default function PostDetailClient({ initialPost }: { initialPost: Post })
               </div>
             ) : (
               post.image_url && (
-                <div style={{ display: "flex", justifyContent: "center", width: "100%", position: "relative", height: "400px" }}>
+                <div className="cover-image-container">
                   <Image
                     src={post.image_url}
                     alt={post.title}
                     fill
                     className="post-detail-image"
-                    style={{ objectFit: "contain" }}
                   />
                 </div>
               )
@@ -255,7 +254,7 @@ export default function PostDetailClient({ initialPost }: { initialPost: Post })
           </div>
 
           {post.video_url && (
-            <div style={{ display: "flex", justifyContent: "center", width: "100%", position: "relative" }}>
+            <div className="video-container">
               <video
                 controls
                 playsInline

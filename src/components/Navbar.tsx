@@ -23,25 +23,20 @@ export default function Navbar() {
         <span>فخورون بالإمارات</span>
       </Link>
       <div className="nav-links">
-        <NotificationBell />
-        <ThemeToggle />
-        <Link href="/" className="btn-secondary" style={{ padding: "0.5rem 1.2rem", fontSize: "0.85rem" }}>
+        <div className="nav-utils" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <NotificationBell />
+          <ThemeToggle />
+        </div>
+        <Link href="/" className="btn-secondary nav-btn">
           🏠 الرئيسية
         </Link>
-        <Link href="/submit" className="btn-primary" style={{ padding: "0.5rem 1.2rem", fontSize: "0.85rem" }}>
+        <Link href="/submit" className="btn-primary nav-btn">
           ✨ شارك الآن
         </Link>
         {isAdmin && (
           <button 
             onClick={handleLogout} 
-            className="btn-secondary" 
-            style={{ 
-              padding: "0.5rem 1.2rem", 
-              fontSize: "0.85rem", 
-              background: "rgba(206,17,38,0.1)", 
-              borderColor: "rgba(206,17,38,0.3)",
-              color: "#ff6b7a" 
-            }}
+            className="btn-secondary logout-btn" 
           >
             🛡️ خروج
           </button>
