@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       siteName: "فخورون بالإمارات",
       images: post.image_url ? [{ url: post.image_url }] : [],
       type: "article",
+      locale: "ar_AE",
     },
     twitter: {
       card: "summary_large_image",
@@ -68,12 +69,53 @@ export default async function PostPage({ params }: PostPageProps) {
     "description": post.content.substring(0, 200),
   };
 
+  // 3. Breadcrumb Schema
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "الرئيسية",
+        "item": "https://socialstudyncs.space/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": post.title,
+        "item": `https://socialstudyncs.space/post/${post.id}`
+      }
+    ]
+  };
+
+  // 4. Video Schema (Conditional)
+  const videoLd = post.video_url ? {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": post.title,
+    "description": post.content.substring(0, 150),
+    "thumbnailUrl": [post.image_url || "https://socialstudyncs.space/logo.png"],
+    "uploadDate": post.created_at,
+    "contentUrl": post.video_url,
+  } : null;
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      {videoLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(videoLd) }}
+        />
+      )}
       <PostDetailClient initialPost={post} />
     </>
   );
