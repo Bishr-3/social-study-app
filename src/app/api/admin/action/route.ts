@@ -25,7 +25,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { action, postId, commentId, likesDelta } = await req.json();
+  const body = await req.json();
+  const { action, postId, commentId, likesDelta, title, content, imageUrl } = body;
   const supabaseAdmin = getAdminClient();
 
   switch (action) {
@@ -58,7 +59,6 @@ export async function POST(req: Request) {
     }
 
     case "updatePost": {
-      const { title, content, imageUrl } = await req.json();
       if (!postId) return NextResponse.json({ error: "Missing postId" }, { status: 400 });
       
       const updateData: any = {};
