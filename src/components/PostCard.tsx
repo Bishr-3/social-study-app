@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import type { Post } from "@/lib/supabase";
-import { Heart, Trash2, Star, Award } from "lucide-react";
+import { Heart, Trash2, Star, Award, Minus } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useTeacherStatus } from "@/hooks/useTeacherStatus";
@@ -46,17 +46,34 @@ export default function PostCard({ post }: { post: Post }) {
 
   async function handleLike(e: React.MouseEvent) {
     e.preventDefault();
-    if (liked) return;
+    if (!isAdmin && liked) return;
 
-    setLiked(true);
-    setLikes((prev) => prev + 1);
+    try {
+      const res = await fetch("/api/posts/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: post.id, action: "increment" }),
+      });
 
-    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
-    likedPosts.push(post.id);
-    localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
-    trackAchievement('likes');
+      const data = await res.json();
 
-    await supabase.rpc("increment_like", { post_id: post.id });
+      if (res.ok) {
+        if (!isAdmin) {
+          setLiked(true);
+          const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+          if (!likedPosts.includes(post.id)) {
+            likedPosts.push(post.id);
+            localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
+          }
+          trackAchievement('likes');
+        }
+        setLikes(prev => prev + 1);
+      } else if (data.error === "ALREADY_LIKED") {
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error("Like Action Failed:", err);
+    }
   }
 
   async function handleDelete(e: React.MouseEvent) {
@@ -269,28 +286,53 @@ export default function PostCard({ post }: { post: Post }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="student-name">👤 {post.student_name}</span>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <div 
-                onClick={handleLike}
-                style={{ 
-                  display: "flex", 
-                  alignItems: "center", 
-                  gap: "0.2rem", 
-                  color: liked ? "var(--uae-red)" : "var(--text-secondary)", 
-                  fontSize: "0.9rem", 
-                  fontWeight: "bold",
-                  padding: "0.3rem 0.6rem",
-                  borderRadius: "20px",
-                  background: liked ? "rgba(206,17,38,0.1)" : "var(--glass-bg)",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!liked) e.currentTarget.style.color = "var(--uae-red)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!liked) e.currentTarget.style.color = "var(--text-secondary)";
-                }}
-              >
-                <Heart size={16} fill={liked ? "var(--uae-red)" : "none"} stroke={liked ? "var(--uae-red)" : "currentColor"} /> {likes}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+                <div 
+                  onClick={handleLike}
+                  style={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    gap: "0.2rem", 
+                    color: liked ? "var(--uae-red)" : "var(--text-secondary)", 
+                    fontSize: "0.9rem", 
+                    fontWeight: "bold",
+                    padding: "0.3rem 0.6rem",
+                    borderRadius: "20px",
+                    background: liked ? "rgba(206,17,38,0.1)" : "var(--glass-bg)",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!liked) e.currentTarget.style.color = "var(--uae-red)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!liked) e.currentTarget.style.color = "var(--text-secondary)";
+                  }}
+                >
+                  <Heart size={16} fill={liked ? "var(--uae-red)" : "none"} stroke={liked ? "var(--uae-red)" : "currentColor"} /> {likes}
+                </div>
+                {isAdmin && (
+                  <button
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      await fetch("/api/posts/like", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ postId: post.id, action: "decrement" }),
+                      });
+                      setLikes(prev => Math.max(0, prev - 1));
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--text-secondary)",
+                      cursor: "pointer",
+                      padding: "0.2rem"
+                    }}
+                    title="إنقاص"
+                  >
+                    <Minus size={14} />
+                  </button>
+                )}
               </div>
               <span
                 style={{
