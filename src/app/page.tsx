@@ -254,7 +254,7 @@ export default function HomePage() {
       </section>
 
       {/* Live Stats Section */}
-      <section style={{ maxWidth: "1200px", margin: "3rem auto", padding: "0 2rem" }}>
+      <section className="stats-container" style={{ maxWidth: "1200px", margin: "3rem auto", padding: "0 2rem" }}>
         <div style={{ display: "flex", justifyContent: "space-around", gap: "1rem", flexWrap: "wrap" }}>
           {[
             { label: "مشاركة إبداعية", value: stats.total_posts, emoji: "🚀" },
@@ -286,7 +286,7 @@ export default function HomePage() {
       </section>
 
       {/* Daily Challenge Section */}
-      <section style={{ maxWidth: "1200px", margin: "0 auto 3rem", padding: "0 2rem" }}>
+      <section className="daily-challenge-container" style={{ maxWidth: "1200px", margin: "0 auto 3rem", padding: "0 2rem" }}>
         <div 
           className="glass-card fade-in-up" 
           style={{ 

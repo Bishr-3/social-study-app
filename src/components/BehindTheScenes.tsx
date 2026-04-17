@@ -54,9 +54,9 @@ export default function BehindTheScenes() {
           >
             <div style={{ 
               display: "grid", 
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
               gap: "1.5rem", 
-              padding: "3rem 2rem" 
+              padding: "2rem 1rem" 
             }}>
               {gallery.map((item, i) => (
                 <motion.div

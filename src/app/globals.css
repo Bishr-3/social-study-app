@@ -579,72 +579,129 @@ body::before {
 .flag-white-stripe { background-color: #ffffff; flex: 1; }
 .flag-black-stripe { background-color: #000000; flex: 1; }
 
-/* 📱 Mobile Responsiveness */
+/* 📱 Comprehensive Mobile Responsiveness */
 @media (max-width: 768px) {
-  /* Navbar Tweaks */
+  :root {
+    --section-gap: 2.5rem;
+  }
+
+  body {
+    font-size: 15px; /* Slightly smaller base font */
+  }
+
+  /* Navbar Adjustments */
   .navbar {
-    padding: 0.8rem 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    flex-wrap: nowrap; /* Keep it in one row if possible */
+    gap: 0.4rem;
   }
   
   .navbar-brand {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
   }
 
   .nav-links {
-    display: flex;
-    gap: 0.5rem;
-    width: 100%;
-    justify-content: center;
+    gap: 0.3rem;
   }
 
-  /* Increase top margin so content isn't hidden under double-row navbar */
+  .nav-links .btn-primary, 
+  .nav-links .btn-secondary {
+    padding: 0.4rem 0.7rem !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap;
+    border-radius: 8px;
+  }
+
+  /* Hero Section Scaling */
   .hero-section {
-    margin-top: 100px !important;
-    min-height: 40vh;
-    padding: 1.5rem 1rem;
+    margin-top: 70px !important;
+    min-height: 35vh;
+    padding: 1rem;
+    gap: 0.8rem;
   }
   
-  .post-detail {
-    margin-top: 120px !important;
-  }
-
-  /* Text & Buttons Scaling */
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 1.8rem !important; /* Force smaller size */
+    margin-bottom: 0.5rem;
   }
   
   .hero-subtitle {
-    font-size: 1rem;
-    line-height: 1.8;
+    font-size: 0.85rem !important;
+    line-height: 1.6;
+    margin-top: 0.5rem;
+    padding: 0 10px;
   }
-  
+
+  .hero-flag-custom {
+    width: 100px;
+    height: 60px;
+    margin: 1.5rem 0;
+  }
+
   .btn-primary, .btn-secondary {
-    padding: 0.6rem 1.2rem !important;
-    font-size: 0.9rem !important;
-    width: 100%;
-    justify-content: center;
+    padding: 0.7rem 1.2rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 10px;
+    width: auto !important;
   }
-  
-  /* Sections Adjustments */
+
+  /* Post Grid & Cards */
   .posts-grid {
-    padding: 1rem;
-    gap: 1.5rem;
-    grid-template-columns: 1fr;
+    padding: 0.75rem;
+    gap: 1rem;
+    grid-template-columns: 1fr; /* Single column on mobile */
   }
 
   .glass-card {
-    padding: 1.5rem !important;
+    padding: 1rem !important;
+    border-radius: 15px;
   }
-  
-  /* Search Bar Adjustments */
+
+  .glass-card .card-image {
+    height: 180px;
+  }
+
+  /* Section Headers */
+  .section-header {
+    padding: 1.5rem 1rem 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.3rem !important;
+  }
+
+  .section-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* Search Bar */
   .search-bar-container {
     padding: 0 1rem;
+    margin-bottom: 1.5rem;
   }
-  
+
   .search-input {
-    font-size: 0.9rem;
+    padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+    font-size: 0.85rem;
+  }
+
+  /* Post Detail Page */
+  .post-detail {
+    margin-top: 80px !important;
+    padding: 0.5rem !important;
+  }
+
+  .post-detail article {
+    padding: 1.5rem !important;
+  }
+
+  .post-detail-title {
+    font-size: 1.4rem !important;
+  }
+
+  .stats-container, .daily-challenge-container {
+    padding: 0 1rem !important;
+    margin: 2rem auto !important;
   }
 }

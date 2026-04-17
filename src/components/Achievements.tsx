@@ -54,6 +54,7 @@ export default function Achievements() {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
+        className="achievements-btn"
         style={{
           position: "fixed",
           bottom: "2rem",
