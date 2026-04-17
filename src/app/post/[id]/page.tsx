@@ -4,15 +4,17 @@ import PostDetailClient from "@/components/PostDetailClient";
 import { notFound } from "next/navigation";
 
 interface PostPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // 1. Dynamic SEO Metadata
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
+  const { id } = await params;
+  
   const { data: post } = await supabase
     .from("posts")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!post) return { title: "المشاركة غير موجودة" };
@@ -45,10 +47,12 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 }
 
 export default async function PostPage({ params }: PostPageProps) {
+  const { id } = await params;
+
   const { data: post } = await supabase
     .from("posts")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!post) {
