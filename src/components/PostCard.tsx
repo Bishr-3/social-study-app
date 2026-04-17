@@ -1,0 +1,106 @@
+"use client";
+
+import Link from "next/link";
+import type { Post } from "@/lib/supabase";
+
+const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
+  video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
+  design: { label: "تصميم إبداعي", emoji: "🎨", badge: "badge-design" },
+  poem: { label: "قصيدة شعرية", emoji: "✍️", badge: "badge-poem" },
+  story: { label: "قصة قصيرة", emoji: "📖", badge: "badge-story" },
+  free: { label: "فكرة حرة", emoji: "🌟", badge: "badge-free" },
+};
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("ar-AE", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+export default function PostCard({ post }: { post: Post }) {
+  const cat = categoryLabels[post.category] || categoryLabels.free;
+
+  return (
+    <Link href={`/post/${post.id}`} style={{ textDecoration: "none" }}>
+      <article className="glass-card" style={{ cursor: "pointer" }}>
+        {post.image_url && (
+          <div className="card-image-wrapper">
+            <img
+              src={post.image_url}
+              alt={post.title}
+              className="card-image"
+              loading="lazy"
+            />
+          </div>
+        )}
+        {!post.image_url && (
+          <div
+            className="card-image-wrapper"
+            style={{
+              height: "220px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "linear-gradient(135deg, rgba(0,115,47,0.1), rgba(206,17,38,0.1))",
+              fontSize: "4rem",
+            }}
+          >
+            🇦🇪
+          </div>
+        )}
+        <div style={{ padding: "1.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+            <span className={`category-badge ${cat.badge}`}>
+              {cat.emoji} {cat.label}
+            </span>
+            <span className="post-date">📅 {formatDate(post.created_at)}</span>
+          </div>
+          <h3
+            style={{
+              fontSize: "1.2rem",
+              fontWeight: 700,
+              color: "white",
+              marginBottom: "0.75rem",
+              lineHeight: 1.5,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {post.title}
+          </h3>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.5)",
+              fontSize: "0.9rem",
+              lineHeight: 1.8,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              marginBottom: "1rem",
+            }}
+          >
+            {post.content}
+          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span className="student-name">👤 {post.student_name}</span>
+            <span
+              style={{
+                color: "var(--uae-green)",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+              }}
+            >
+              اقرأ المزيد ←
+            </span>
+          </div>
+        </div>
+      </article>
+    </Link>
+  );
+}

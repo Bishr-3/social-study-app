@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# فخورون بالإمارات 🇦🇪
 
-## Getting Started
+موقع تفاعلي لفعالية "فخورون بالإمارات" - المدرسة الأهلية الخيرية – سمنان
 
-First, run the development server:
+## 🚀 التقنيات المستخدمة
+
+- **Next.js** - إطار العمل
+- **Supabase** - قاعدة البيانات والتخزين
+- **Vercel** - الاستضافة
+
+## 📋 الإعداد
+
+### 1. إعداد Supabase
+
+1. أنشئ مشروع جديد على [supabase.com](https://supabase.com)
+2. افتح **SQL Editor**
+3. انسخ محتوى ملف `supabase-setup.sql` والصقه في المحرر
+4. اضغط **Run** لإنشاء الجداول والسياسات
+
+### 2. إعداد المتغيرات البيئية
+
+1. انسخ ملف `.env.local.example` إلى `.env.local`
+2. أضف مفاتيح Supabase الخاصة بك:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 3. تشغيل المشروع محلياً
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 4. النشر على Vercel
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. ارفع المشروع على GitHub
+2. اربط المستودع بـ [vercel.com](https://vercel.com)
+3. أضف المتغيرات البيئية في إعدادات Vercel
+4. انشر!
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 👨‍💻 عمل الطلاب
 
-## Learn More
+**بشر جرار** و **رضوان منذر**
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+قسم الدراسات الاجتماعية — المدرسة الأهلية الخيرية – سمنان 🇦🇪
