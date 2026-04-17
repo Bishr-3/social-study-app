@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export default function PrivacyPage() {
-  const whatsappUrl = "https://api.whatsapp.com/send?phone=971502407619";
+  const whatsappUrl = "https://api.whatsapp.com/send?phone=971502406519";
 
   return (
     <div className="container mx-auto px-4 py-20 min-h-screen flex flex-col items-center" dir="rtl" style={{ color: "var(--text-primary)" }}>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 px-10 py-4 bg-[#25D366] text-white font-black rounded-full shadow-lg hover:scale-110 transition-transform text-2xl"
               >
-                📱 تواصل عبر الواتساب: 0502407619
+                📱 تواصل عبر الواتساب: 0502406519
               </a>
             </section>
           </div>
