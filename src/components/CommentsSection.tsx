@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase, type Comment } from "@/lib/supabase";
-import { MessageCircle, Trash2 } from "lucide-react";
+import { MessageCircle, Trash2, Award } from "lucide-react";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { useTeacherStatus } from "@/hooks/useTeacherStatus";
 
 export default function CommentsSection({ postId }: { postId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -12,10 +13,17 @@ export default function CommentsSection({ postId }: { postId: string }) {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { isAdmin } = useAdminStatus();
+  const { isTeacher } = useTeacherStatus();
 
   useEffect(() => {
     fetchComments();
   }, [postId]);
+
+  useEffect(() => {
+    if (isTeacher) {
+      setName("الأستاذ صهيب سيد");
+    }
+  }, [isTeacher]);
 
   async function fetchComments() {
     const { data } = await supabase
@@ -35,8 +43,9 @@ export default function CommentsSection({ postId }: { postId: string }) {
 
     const newComment = {
       post_id: postId,
-      student_name: name.trim(),
+      student_name: isTeacher ? "الأستاذ صهيب سيد" : name.trim(),
       content: content.trim(),
+      is_teacher: isTeacher
     };
 
     const { data, error } = await supabase
@@ -79,14 +88,26 @@ export default function CommentsSection({ postId }: { postId: string }) {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {comments.map((c) => (
-              <div key={c.id} className="comment-box fade-in" style={{ position: "relative" }}>
+              <div 
+                key={c.id} 
+                className="comment-box fade-in" 
+                style={{ 
+                  position: "relative",
+                  background: c.is_teacher ? "linear-gradient(135deg, rgba(200, 169, 81, 0.1), rgba(200, 169, 81, 0.05))" : "var(--glass-bg)",
+                  border: c.is_teacher ? "1px solid rgba(200, 169, 81, 0.3)" : "1px solid var(--glass-border)",
+                  boxShadow: c.is_teacher ? "0 4px 15px rgba(200, 169, 81, 0.15)" : "none"
+                }}
+              >
                 <div className="comment-header">
-                  <span className="comment-author">👤 {c.student_name}</span>
+                  <span className="comment-author" style={{ color: c.is_teacher ? "var(--uae-gold)" : "var(--text-primary)", fontWeight: c.is_teacher ? 800 : 600 }}>
+                    {c.is_teacher ? "🎓 " : "👤 "}{c.student_name}
+                    {c.is_teacher && <span style={{ marginRight: "0.5rem", fontSize: "0.7rem", padding: "0.1rem 0.5rem", borderRadius: "50px", background: "var(--uae-gold)", color: "white" }}>المعلم</span>}
+                  </span>
                   <span className="comment-date">
                     {new Date(c.created_at).toLocaleDateString("ar-AE")}
                   </span>
                 </div>
-                <div className="comment-content">{c.content}</div>
+                <div className="comment-content" style={{ fontWeight: c.is_teacher ? 500 : 400 }}>{c.content}</div>
                 {isAdmin && (
                   <button
                     onClick={() => handleDeleteComment(c.id)}
@@ -123,12 +144,18 @@ export default function CommentsSection({ postId }: { postId: string }) {
           <div>
             <input
               type="text"
-              placeholder="اسمك..."
+              placeholder={isTeacher ? "الأستاذ صهيب سيد" : "اسمك..."}
               className="form-input"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => !isTeacher && setName(e.target.value)}
               required
-              style={{ padding: "0.75rem 1rem" }}
+              disabled={isTeacher}
+              style={{ 
+                padding: "0.75rem 1rem",
+                background: isTeacher ? "rgba(200, 169, 81, 0.05)" : "white",
+                color: isTeacher ? "var(--uae-gold)" : "black",
+                fontWeight: isTeacher ? 700 : 400
+              }}
             />
           </div>
           <div>

@@ -43,5 +43,6 @@ export type Comment = {
   post_id: string;
   student_name: string;
   content: string;
+  is_teacher?: boolean;
   created_at: string;
 };
