@@ -1,3 +1,4 @@
+لا تنقص منه شيء بل عدل او زد
 "use client";
 
 import Link from "next/link";

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Heart, Share2, Check, Plus, Minus } from "lucide-react";
+import { useState } from "react";
+import { Heart, Share2, Check, Minus } from "lucide-react";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 interface Props {
@@ -16,31 +16,8 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
   const [loading, setLoading] = useState(false);
   const { isAdmin } = useAdminStatus();
 
-  useEffect(() => {
-    // Check local storage for UI state
-    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
-    if (likedPosts.includes(postId)) {
-      setLiked(true);
-    }
-
-    // Verify with server for accuracy (if not liked yet)
-    if (!likedPosts.includes(postId)) {
-      fetch(`/api/posts/like?postId=${postId}`)
-        .then(r => r.json())
-        .then(d => {
-          if (d.liked) {
-            setLiked(true);
-            const updated = [...likedPosts, postId];
-            localStorage.setItem("liked_posts", JSON.stringify(updated));
-          }
-        });
-    }
-  }, [postId]);
-
-  async function handleAction(action: "increment" | "decrement") {
+  async function handleLike() {
     if (loading) return;
-    // Allow everyone to increment multiple times, but only Admin can decrement
-    if (action === "decrement" && !isAdmin) return;
 
     setLoading(true);
 
@@ -48,26 +25,44 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
       const res = await fetch("/api/posts/like", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, action }),
+        body: JSON.stringify({ postId }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        if (!isAdmin) {
-          setLiked(true);
-          const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
-          if (!likedPosts.includes(postId)) {
-            likedPosts.push(postId);
-            localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
-          }
-        }
-        setLikes(prev => (action === "increment" ? prev + 1 : Math.max(0, prev - 1)));
+        setLiked(true);
+        setLikes((prev) => prev + 1);
       } else if (data.error === "ALREADY_LIKED") {
         setLiked(true);
       }
     } catch (err) {
       console.error("Like Action Failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDecrement() {
+    if (loading || !isAdmin) return;
+
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/posts/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          postId,
+          action: "decrement",
+        }),
+      });
+
+      if (res.ok) {
+        setLikes((prev) => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error("Decrement Failed:", err);
     } finally {
       setLoading(false);
     }
@@ -81,20 +76,27 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
 
   return (
     <div className="interaction-bar flex items-center gap-4">
+      {/* LIKE BUTTON */}
       <div className="flex items-center gap-1">
         <button
-          onClick={() => handleAction("increment")}
-          disabled={loading || (!isAdmin && liked)}
-          className={`interaction-item ${liked ? "liked" : ""} ${loading ? "opacity-50" : ""}`}
-          title={isAdmin ? "زيادة الإعجابات" : liked ? "تم الإعجاب" : "إعجاب"}
+          onClick={handleLike}
+          disabled={loading || liked}
+          className={`interaction-item ${liked ? "liked" : ""} ${
+            loading ? "opacity-50" : ""
+          }`}
+          title={liked ? "تم الإعجاب" : "إعجاب"}
         >
-          <Heart size={20} fill={liked ? "var(--uae-red)" : "none"} />
+          <Heart
+            size={20}
+            fill={liked ? "var(--uae-red)" : "none"}
+          />
           <span>{likes}</span>
         </button>
 
+        {/* ADMIN ONLY DECREMENT */}
         {isAdmin && (
           <button
-            onClick={() => handleAction("decrement")}
+            onClick={handleDecrement}
             disabled={loading}
             className="interaction-item text-slate-400 hover:text-red-500"
             title="إنقاص الإعجابات"
@@ -104,9 +106,18 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
         )}
       </div>
 
+      {/* SHARE BUTTON */}
       <button onClick={handleShare} className="interaction-item">
-        {copied ? <Check size={20} color="var(--uae-green)" /> : <Share2 size={20} />}
-        <span style={{ color: copied ? "var(--uae-green)" : "inherit" }}>
+        {copied ? (
+          <Check size={20} color="var(--uae-green)" />
+        ) : (
+          <Share2 size={20} />
+        )}
+        <span
+          style={{
+            color: copied ? "var(--uae-green)" : "inherit",
+          }}
+        >
           {copied ? "تم النسخ!" : "مشاركة"}
         </span>
       </button>

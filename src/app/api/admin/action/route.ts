@@ -10,11 +10,11 @@ async function verifyAdmin(): Promise<boolean> {
   return !!(token && validToken && token.value === validToken);
 }
 
-// إنشاء Supabase client بمفتاح Service Role (يتخطى كل قواعد RLS)
+// إنشاء Supabase client بمفتاح Service Role
 function getAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!, // مفتاح سري لا يُرسل للمتصفح أبداً
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
@@ -26,42 +26,113 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { action, postId, commentId, likesDelta, title, content, imageUrl } = body;
+  const {
+    action,
+    postId,
+    commentId,
+    likesDelta,
+    title,
+    content,
+    imageUrl,
+  } = body;
+
   const supabaseAdmin = getAdminClient();
 
   switch (action) {
     case "deletePost": {
-      if (!postId) return NextResponse.json({ error: "Missing postId" }, { status: 400 });
-      // حذف التعليقات أولاً
+      if (!postId)
+        return NextResponse.json({ error: "Missing postId" }, { status: 400 });
+
       await supabaseAdmin.from("comments").delete().eq("post_id", postId);
-      // حذف المنشور
-      const { error } = await supabaseAdmin.from("posts").delete().eq("id", postId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      const { error } = await supabaseAdmin
+        .from("posts")
+        .delete()
+        .eq("id", postId);
+
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
+
       return NextResponse.json({ success: true });
     }
 
     case "deleteComment": {
-      if (!commentId) return NextResponse.json({ error: "Missing commentId" }, { status: 400 });
-      const { error } = await supabaseAdmin.from("comments").delete().eq("id", commentId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (!commentId)
+        return NextResponse.json({ error: "Missing commentId" }, { status: 400 });
+
+      const { error } = await supabaseAdmin
+        .from("comments")
+        .delete()
+        .eq("id", commentId);
+
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
+
       return NextResponse.json({ success: true });
     }
 
+    // ➕ تعديل زيادة/نقصان
     case "adjustLikes": {
       if (!postId || likesDelta === undefined)
-        return NextResponse.json({ error: "Missing postId or likesDelta" }, { status: 400 });
-      // اجلب القيمة الحالية أولاً
-      const { data } = await supabaseAdmin.from("posts").select("likes").eq("id", postId).single();
-      const newLikes = Math.max(0, (data?.likes || 0) + likesDelta);
-      const { error } = await supabaseAdmin.from("posts").update({ likes: newLikes }).eq("id", postId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(
+          { error: "Missing postId or likesDelta" },
+          { status: 400 }
+        );
+
+      const { data } = await supabaseAdmin
+        .from("posts")
+        .select("likes")
+        .eq("id", postId)
+        .single();
+
+      const newLikes = Math.max(0, (data?.likes || 0) + Number(likesDelta));
+
+      const { error } = await supabaseAdmin
+        .from("posts")
+        .update({ likes: newLikes })
+        .eq("id", postId);
+
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
+
       return NextResponse.json({ success: true, newLikes });
     }
 
+    // ⭐ NEW: تعيين عدد اللايكات مباشرة
+    case "setLikes": {
+      if (!postId || likesDelta === undefined) {
+        return NextResponse.json(
+          { error: "Missing postId or likes value" },
+          { status: 400 }
+        );
+      }
+
+      const newLikes = Math.max(0, Number(likesDelta));
+
+      const { error } = await supabaseAdmin
+        .from("posts")
+        .update({ likes: newLikes })
+        .eq("id", postId);
+
+      if (error) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        newLikes,
+      });
+    }
+
     case "updatePost": {
-      if (!postId) return NextResponse.json({ error: "Missing postId" }, { status: 400 });
-      
+      if (!postId)
+        return NextResponse.json({ error: "Missing postId" }, { status: 400 });
+
       const updateData: any = {};
+
       if (title !== undefined) updateData.title = title;
       if (content !== undefined) updateData.content = content;
       if (imageUrl !== undefined) updateData.image_url = imageUrl;
@@ -71,7 +142,9 @@ export async function POST(req: Request) {
         .update(updateData)
         .eq("id", postId);
 
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
+
       return NextResponse.json({ success: true });
     }
 
