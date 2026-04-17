@@ -6,10 +6,12 @@ import { Bell, Heart, MessageCircle, Star, UserPlus, X, Settings } from "lucide-
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function NotificationBell() {
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [myNames, setMyNames] = useState<string[]>([]);
   const [newName, setNewName] = useState("");
   const [isManaging, setIsManaging] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     // Load names from localStorage
