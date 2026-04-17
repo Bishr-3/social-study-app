@@ -579,6 +579,30 @@ body::before {
 .flag-white-stripe { background-color: #ffffff; flex: 1; }
 .flag-black-stripe { background-color: #000000; flex: 1; }
 
+.post-detail-image {
+  width: 100%;
+  max-width: 600px;
+  max-height: 450px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin: 0 auto 2rem;
+  display: block;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.02);
+}
+
+.post-detail-video {
+  width: 100%;
+  max-width: 700px;
+  max-height: 400px;
+  margin: 0 auto 2rem;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  background: #000;
+}
+
+
 /* 📱 Comprehensive Mobile Responsiveness */
 @media (max-width: 768px) {
   :root {

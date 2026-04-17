@@ -172,24 +172,24 @@ export default function PostDetailPage() {
 
         <article className="glass-card" style={{ padding: "2.5rem" }}>
           {post.image_url && (
-            <img
-              src={post.image_url}
-              alt={post.title}
-              className="post-detail-image"
-            />
+            <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+              <img
+                src={post.image_url}
+                alt={post.title}
+                className="post-detail-image"
+              />
+            </div>
           )}
 
           {post.video_url && (
-            <video
-              controls
-              src={post.video_url}
-              style={{
-                width: "100%",
-                borderRadius: "12px",
-                marginBottom: "2rem",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-              }}
-            />
+            <div style={{ display: "flex", justifyContent: "center", width: "100%", position: "relative" }}>
+              <video
+                controls
+                playsInline
+                src={post.video_url}
+                className="post-detail-video"
+              />
+            </div>
           )}
 
           {post.document_url && (
