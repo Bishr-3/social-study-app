@@ -17,8 +17,6 @@ import BehindTheScenes from "@/components/BehindTheScenes";
 import Achievements from "@/components/Achievements";
 import { motion, AnimatePresence } from "framer-motion";
 
-export const revalidate = 60; // Revalidate the page every 60 seconds (ISR)
-
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
