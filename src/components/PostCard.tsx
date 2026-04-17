@@ -7,6 +7,7 @@ import { Heart, Trash2, Star, Award } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useTeacherStatus } from "@/hooks/useTeacherStatus";
+import { trackAchievement } from "./Achievements";
 
 const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
   video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
@@ -53,6 +54,7 @@ export default function PostCard({ post }: { post: Post }) {
     const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
     likedPosts.push(post.id);
     localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
+    trackAchievement('likes');
 
     await supabase.rpc("increment_like", { post_id: post.id });
   }
@@ -157,6 +159,52 @@ export default function PostCard({ post }: { post: Post }) {
               gap: "0.2rem"
             }}>
               <Star size={14} fill="var(--uae-gold)" /> {rating}/5
+            </div>
+          )}
+          {/* Conditional Special Badges for WOW factor */}
+          {post.likes > 7 && post.category === 'design' && (
+            <div style={{ 
+              background: "linear-gradient(45deg, #FF69B4, #FFA500)", 
+              color: "white", 
+              padding: "0.2rem 0.8rem", 
+              borderRadius: "50px", 
+              fontSize: "0.7rem",
+              fontWeight: 900,
+              boxShadow: "0 4px 15px rgba(255,105,180,0.3)",
+              border: "1px solid white",
+              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
+            }}>
+              🎖️ أفضل تصميم
+            </div>
+          )}
+          {post.likes > 7 && post.category === 'poem' && (
+            <div style={{ 
+              background: "linear-gradient(45deg, #4A90E2, #50E3C2)", 
+              color: "white", 
+              padding: "0.2rem 0.8rem", 
+              borderRadius: "50px", 
+              fontSize: "0.7rem",
+              fontWeight: 900,
+              boxShadow: "0 4px 15px rgba(74,144,226,0.3)",
+              border: "1px solid white",
+              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
+            }}>
+              🎤 شاعر متميز
+            </div>
+          )}
+          {post.likes > 10 && (
+            <div style={{ 
+              background: "linear-gradient(45deg, #FFD700, #FFA500)", 
+              color: "white", 
+              padding: "0.2rem 0.8rem", 
+              borderRadius: "50px", 
+              fontSize: "0.7rem",
+              fontWeight: 900,
+              boxShadow: "0 4px 15px rgba(255,165,0,0.3)",
+              border: "1px solid white",
+              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
+            }}>
+              ✨ مبدع الأسبوع
             </div>
           )}
         </div>

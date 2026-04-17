@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { trackAchievement } from "./Achievements";
 
 // Actual SVG paths for the UAE map (simplified for performance)
 const UAE_PATH_DATA: Record<string, string> = {
@@ -42,7 +43,10 @@ export default function UAEMap({ onSelectEmirate, selectedEmirate }: UAEMapProps
               scale: 1.01,
               transition: { duration: 0.2 }
             }}
-            onClick={() => onSelectEmirate(name === selectedEmirate ? "الكل" : name)}
+            onClick={() => {
+              onSelectEmirate(name === selectedEmirate ? "الكل" : name);
+              trackAchievement('map_clicks');
+            }}
             style={{ cursor: "pointer", strokeWidth: 2, transition: "all 0.3s ease" }}
           >
             <title>{name}</title>
@@ -62,7 +66,10 @@ export default function UAEMap({ onSelectEmirate, selectedEmirate }: UAEMapProps
           <button
             key={name}
             type="button"
-            onClick={() => onSelectEmirate(name === selectedEmirate ? "الكل" : name)}
+            onClick={() => {
+              onSelectEmirate(name === selectedEmirate ? "الكل" : name);
+              trackAchievement('map_clicks');
+            }}
             className={`category-badge ${selectedEmirate === name ? 'badge-poem' : ''}`}
             style={{
               cursor: "pointer",

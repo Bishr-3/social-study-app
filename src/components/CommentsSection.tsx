@@ -5,6 +5,7 @@ import { supabase, type Comment } from "@/lib/supabase";
 import { MessageCircle, Trash2, Award } from "lucide-react";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useTeacherStatus } from "@/hooks/useTeacherStatus";
+import { trackAchievement } from "./Achievements";
 
 export default function CommentsSection({ postId }: { postId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -58,6 +59,7 @@ export default function CommentsSection({ postId }: { postId: string }) {
       setComments((prev) => [...prev, data as Comment]);
       setName("");
       setContent("");
+      trackAchievement('comments');
     }
     setSubmitting(false);
   }

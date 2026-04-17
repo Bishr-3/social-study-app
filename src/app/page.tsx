@@ -13,6 +13,8 @@ import UAEMap from "@/components/UAEMap";
 import ReelsPlayer from "@/components/ReelsPlayer";
 import IntroScreen from "@/components/IntroScreen";
 import StoriesBar from "@/components/StoriesBar";
+import BehindTheScenes from "@/components/BehindTheScenes";
+import Achievements from "@/components/Achievements";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomePage() {
@@ -79,13 +81,41 @@ export default function HomePage() {
       <Particles />
       <Navbar />
 
+      <style>{`
+        @keyframes wave {
+          0% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-5px) rotate(1deg); }
+          100% { transform: translateY(0) rotate(0deg); }
+        }
+        .hero-flag-custom {
+          animation: wave 4s ease-in-out infinite;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+          border: 1px solid rgba(255,255,255,0.1);
+          overflow: hidden;
+          margin-bottom: 2rem;
+          width: 140px;
+          height: 90px;
+          border-radius: 8px;
+          display: flex;
+        }
+        .hero-title {
+          font-size: 3.5rem;
+          font-weight: 900;
+          background: linear-gradient(45deg, var(--uae-gold), #b3903d);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 1rem;
+          text-shadow: 0 10px 20px rgba(200, 169, 81, 0.2);
+        }
+      `}</style>
+
       <section className="hero-section" style={{ marginTop: "60px" }}>
         <div className="hero-flag-custom">
-          <div className="flag-red-bar" />
-          <div className="flag-stripes">
-            <div className="flag-green-stripe" />
-            <div className="flag-white-stripe" />
-            <div className="flag-black-stripe" />
+          <div style={{ width: "30%", background: "var(--uae-red)" }}></div>
+          <div style={{ width: "70%", display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, background: "var(--uae-green)" }}></div>
+            <div style={{ flex: 1, background: "white" }}></div>
+            <div style={{ flex: 1, background: "black" }}></div>
           </div>
         </div>
         <h1 className="hero-title">فخورون بالإمارات 🇦🇪</h1>
@@ -378,6 +408,10 @@ export default function HomePage() {
           />
         )}
       </AnimatePresence>
+
+      <BehindTheScenes />
+
+      <Achievements />
 
       <Footer />
     </>

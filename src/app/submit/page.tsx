@@ -12,6 +12,7 @@ import Certificate from "@/components/Certificate";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { useEffect } from "react";
+import { trackAchievement } from "@/components/Achievements";
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -198,6 +199,7 @@ export default function SubmitPage() {
       });
 
       setIsSuccess(true);
+      trackAchievement('posts');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
       setError(message);
