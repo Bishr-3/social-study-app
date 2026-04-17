@@ -1,11 +1,25 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-export const supabase: SupabaseClient = createClient(
+// regular client for browsers
+export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-key'
+);
+
+// admin client for SERVER-SIDE operations (bypasses RLS)
+export const supabaseAdmin = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseServiceKey || 'placeholder-key',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 export type Post = {

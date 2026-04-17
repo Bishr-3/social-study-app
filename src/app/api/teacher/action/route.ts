@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const { action, postId, rating, isChoice } = await request.json();
 
   if (action === "rate") {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("posts")
       .update({ teacher_rating: rating })
       .eq("id", postId);
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   }
 
   if (action === "toggleChoice") {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from("posts")
       .update({ is_teacher_choice: isChoice })
       .eq("id", postId);
