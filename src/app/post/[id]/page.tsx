@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { supabase, type Post } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,6 +9,8 @@ import Particles from "@/components/Particles";
 import Link from "next/link";
 import LikesAndShare from "@/components/LikesAndShare";
 import CommentsSection from "@/components/CommentsSection";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { Trash2, ThumbsUp, ThumbsDown } from "lucide-react";
 
 const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
   video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
@@ -32,9 +34,36 @@ function formatDate(dateStr: string) {
 
 export default function PostDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [adminLikes, setAdminLikes] = useState<number | null>(null);
+  const { isAdmin } = useAdminStatus();
+
+  async function handleAdminDeletePost() {
+    if (!post) return;
+    if (!confirm("تحذير: سيتم حذف هذا المنشور وجميع تعليقاته نهائياً. هل أنت متأكد؟")) return;
+    const res = await fetch("/api/admin/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "deletePost", postId: post.id }),
+    });
+    if (res.ok) router.push("/");
+  }
+
+  async function handleAdjustLikes(delta: number) {
+    if (!post) return;
+    const res = await fetch("/api/admin/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "adjustLikes", postId: post.id, likesDelta: delta }),
+    });
+    if (res.ok) {
+      const { newLikes } = await res.json();
+      setAdminLikes(newLikes);
+    }
+  }
 
   useEffect(() => {
     async function fetchPost() {
@@ -99,6 +128,47 @@ export default function PostDetailPage() {
         <Link href="/" className="back-btn">
           → العودة للمشاركات
         </Link>
+
+        {isAdmin && (
+          <div style={{
+            display: "flex",
+            gap: "0.75rem",
+            alignItems: "center",
+            flexWrap: "wrap",
+            marginBottom: "1.5rem",
+            padding: "1rem 1.5rem",
+            background: "rgba(206,17,38,0.08)",
+            border: "1px solid rgba(206,17,38,0.3)",
+            borderRadius: "12px",
+          }}>
+            <span style={{ color: "#ff6b7a", fontWeight: 700, fontSize: "0.85rem" }}>🛡️ لوحة تحكم المشرف</span>
+            <button onClick={handleAdminDeletePost} style={{
+              display: "flex", alignItems: "center", gap: "0.4rem",
+              background: "rgba(206,17,38,0.2)", border: "1px solid rgba(206,17,38,0.5)",
+              color: "#ff6b7a", borderRadius: "8px", padding: "0.4rem 0.8rem",
+              cursor: "pointer", fontFamily: "'Cairo',sans-serif", fontSize: "0.85rem", fontWeight: 700,
+            }}>
+              <Trash2 size={14} /> حذف المنشور
+            </button>
+            <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>الإعجابات: {adminLikes ?? (post?.likes || 0)}</span>
+            <button onClick={() => handleAdjustLikes(1)} style={{
+              display: "flex", alignItems: "center", gap: "0.3rem",
+              background: "rgba(0,115,47,0.15)", border: "1px solid rgba(0,115,47,0.4)",
+              color: "#4ade80", borderRadius: "8px", padding: "0.4rem 0.7rem",
+              cursor: "pointer", fontFamily: "'Cairo',sans-serif", fontSize: "0.85rem",
+            }}>
+              <ThumbsUp size={14} /> +1
+            </button>
+            <button onClick={() => handleAdjustLikes(-1)} style={{
+              display: "flex", alignItems: "center", gap: "0.3rem",
+              background: "rgba(206,17,38,0.1)", border: "1px solid rgba(206,17,38,0.3)",
+              color: "#ff6b7a", borderRadius: "8px", padding: "0.4rem 0.7rem",
+              cursor: "pointer", fontFamily: "'Cairo',sans-serif", fontSize: "0.85rem",
+            }}>
+              <ThumbsDown size={14} /> -1
+            </button>
+          </div>
+        )}
 
         <article className="glass-card" style={{ padding: "2.5rem" }}>
           {post.image_url && (

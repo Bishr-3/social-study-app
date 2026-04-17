@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabase, type Comment } from "@/lib/supabase";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Trash2 } from "lucide-react";
+import { useAdminStatus } from "@/hooks/useAdminStatus";
 
 export default function CommentsSection({ postId }: { postId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -10,6 +11,7 @@ export default function CommentsSection({ postId }: { postId: string }) {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { isAdmin } = useAdminStatus();
 
   useEffect(() => {
     fetchComments();
@@ -51,6 +53,18 @@ export default function CommentsSection({ postId }: { postId: string }) {
     setSubmitting(false);
   }
 
+  async function handleDeleteComment(commentId: string) {
+    if (!confirm("هل تريد حذف هذا التعليق نهائياً؟")) return;
+    const res = await fetch("/api/admin/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "deleteComment", commentId }),
+    });
+    if (res.ok) {
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    }
+  }
+
   return (
     <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid var(--glass-border)" }}>
       <h3 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
@@ -65,7 +79,7 @@ export default function CommentsSection({ postId }: { postId: string }) {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {comments.map((c) => (
-              <div key={c.id} className="comment-box fade-in">
+              <div key={c.id} className="comment-box fade-in" style={{ position: "relative" }}>
                 <div className="comment-header">
                   <span className="comment-author">👤 {c.student_name}</span>
                   <span className="comment-date">
@@ -73,6 +87,30 @@ export default function CommentsSection({ postId }: { postId: string }) {
                   </span>
                 </div>
                 <div className="comment-content">{c.content}</div>
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteComment(c.id)}
+                    title="حذف التعليق"
+                    style={{
+                      position: "absolute",
+                      top: "0.5rem",
+                      left: "0.5rem",
+                      background: "rgba(206,17,38,0.15)",
+                      border: "1px solid rgba(206,17,38,0.4)",
+                      borderRadius: "8px",
+                      color: "#ff6b7a",
+                      padding: "0.3rem 0.5rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.3rem",
+                      fontSize: "0.75rem",
+                      fontFamily: "'Cairo', sans-serif",
+                    }}
+                  >
+                    <Trash2 size={12} /> حذف
+                  </button>
+                )}
               </div>
             ))}
           </div>
