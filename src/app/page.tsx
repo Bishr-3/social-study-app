@@ -52,6 +52,7 @@ export default function HomePage() {
     { value: "poem", label: "شعر", emoji: "✍️" },
     { value: "story", label: "قصة", emoji: "📖" },
     { value: "free", label: "حرة", emoji: "🌟" },
+    { value: "powerpoint", label: "عرض تقديمي", emoji: "📊" },
   ];
 
   return (

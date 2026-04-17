@@ -15,30 +15,46 @@ export default function SubmitPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(false);
   const [error, setError] = useState("");
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      // Size limits
+      const maxVideoSize = 100 * 1024 * 1024; // 100MB
+      const maxDocSize = 25 * 1024 * 1024;    // 25MB
+      const maxImgSize = 5 * 1024 * 1024;     // 5MB
+
+      if (category === "video" && selectedFile.size > maxVideoSize) {
+        setError("حجم الفيديو يجب أن يكون أقل من 100 ميجابايت");
+        return;
+      } else if (category === "powerpoint" && selectedFile.size > maxDocSize) {
+        setError("حجم الملف يجب أن يكون أقل من 25 ميجابايت");
+        return;
+      } else if (category !== "video" && category !== "powerpoint" && selectedFile.size > maxImgSize) {
         setError("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
         return;
       }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
+
+      setFile(selectedFile);
+      if (selectedFile.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onloadend = () => setFilePreview(reader.result as string);
+        reader.readAsDataURL(selectedFile);
+      } else {
+        setFilePreview(null);
+      }
       setError("");
     }
   }
 
-  function removeImage() {
-    setImageFile(null);
-    setImagePreview(null);
+  function removeFile() {
+    setFile(null);
+    setFilePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -55,29 +71,32 @@ export default function SubmitPage() {
 
     try {
       let imageUrl: string | null = null;
+      let videoUrl: string | null = null;
+      let documentUrl: string | null = null;
 
-      // Upload image if selected
-      if (imageFile) {
-        const fileExt = imageFile.name.split(".").pop();
+      if (file) {
+        const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const filePath = `posts/${fileName}`;
+        let filePath = `posts/${fileName}`;
+        let bucket = "post-images";
 
-        const { error: uploadError } = await supabase.storage
-          .from("post-images")
-          .upload(filePath, imageFile, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          throw new Error("فشل في رفع الصورة: " + uploadError.message);
+        if (category === "video") {
+          bucket = "post-videos";
+        } else if (category === "powerpoint") {
+          bucket = "post-documents";
         }
 
-        const { data: urlData } = supabase.storage
-          .from("post-images")
-          .getPublicUrl(filePath);
+        const { error: uploadError } = await supabase.storage
+          .from(bucket)
+          .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
-        imageUrl = urlData.publicUrl;
+        if (uploadError) throw new Error("فشل في رفع الملف: " + uploadError.message);
+
+        const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
+
+        if (category === "video") videoUrl = urlData.publicUrl;
+        else if (category === "powerpoint") documentUrl = urlData.publicUrl;
+        else imageUrl = urlData.publicUrl;
       }
 
       // Insert post
@@ -88,6 +107,8 @@ export default function SubmitPage() {
           content: content.trim(),
           category,
           image_url: imageUrl,
+          video_url: videoUrl,
+          document_url: documentUrl,
         },
       ]);
 
@@ -169,6 +190,7 @@ export default function SubmitPage() {
                 <option value="poem">✍️ قصيدة شعرية</option>
                 <option value="story">📖 قصة قصيرة مع رسومات</option>
                 <option value="free">🌟 فكرة حرة مبتكرة</option>
+                <option value="powerpoint">📊 عرض تقديمي (PowerPoint)</option>
               </select>
             </div>
 
@@ -203,35 +225,41 @@ export default function SubmitPage() {
               />
             </div>
 
-            {/* Image Upload */}
+            {/* File Upload */}
             <div className="form-group">
-              <label className="form-label">🖼️ صورة المشاركة</label>
+              <label className="form-label">
+                {category === "video" ? "🎥 ملف الفيديو" : category === "powerpoint" ? "📊 ملف العرض التقديمي" : "🖼️ صورة المشاركة"}
+              </label>
               <div className="file-upload">
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
+                  accept={category === "video" ? "video/*" : category === "powerpoint" ? ".pptx,.pdf" : "image/*"}
+                  onChange={handleFileChange}
                 />
                 <div className="file-upload-icon">📤</div>
                 <div className="file-upload-text">
-                  اضغط هنا أو اسحب الصورة لرفعها
+                  {category === "video" ? "اضغط هنا لمعرض الفيديوهات أو اسحب الفيديو" : category === "powerpoint" ? "اضغط هنا لاختيار البوربوينت أو PDF" : "اضغط هنا أو اسحب الصورة لرفعها"}
                 </div>
                 <div
                   className="file-upload-text"
                   style={{ fontSize: "0.75rem", marginTop: "0.3rem" }}
                 >
-                  الحد الأقصى: 5 ميجابايت (JPG, PNG, WEBP)
+                  {category === "video" ? "الحد الأقصى: 100 ميجابايت (MP4, WEBM)" : category === "powerpoint" ? "الحد الأقصى: 25 ميجابايت (PPTX, PDF)" : "الحد الأقصى: 5 ميجابايت (JPG, PNG, WEBP)"}
                 </div>
               </div>
 
-              {imagePreview && (
-                <div className="image-preview">
-                  <img src={imagePreview} alt="معاينة الصورة" />
+              {file && (
+                <div className="image-preview" style={{ padding: filePreview ? 0 : "1rem", background: "var(--glass-bg)", borderRadius: "12px", marginTop: "1rem" }}>
+                  {filePreview ? (
+                    <img src={filePreview} alt="معاينة" />
+                  ) : (
+                    <div style={{ color: "var(--uae-gold)", fontWeight: "bold" }}>📄 تم اختيار: {file.name}</div>
+                  )}
                   <button
                     type="button"
                     className="remove-image"
-                    onClick={removeImage}
+                    onClick={removeFile}
                   >
                     ✕
                   </button>

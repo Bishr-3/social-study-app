@@ -12,6 +12,7 @@ const categoryLabels: Record<string, { label: string; emoji: string; badge: stri
   poem: { label: "قصيدة شعرية", emoji: "✍️", badge: "badge-poem" },
   story: { label: "قصة قصيرة", emoji: "📖", badge: "badge-story" },
   free: { label: "فكرة حرة", emoji: "🌟", badge: "badge-free" },
+  powerpoint: { label: "عرض تقديمي (PowerPoint)", emoji: "📊", badge: "badge-powerpoint" },
 };
 
 function formatDate(dateStr: string) {
@@ -71,10 +72,11 @@ export default function PostCard({ post }: { post: Post }) {
               alignItems: "center",
               justifyContent: "center",
               background: "linear-gradient(135deg, rgba(0,115,47,0.1), rgba(206,17,38,0.1))",
-              fontSize: "4rem",
+              fontSize: "5rem",
+              textShadow: "0 4px 15px rgba(0,0,0,0.1)",
             }}
           >
-            🇦🇪
+            {post.category === "video" ? "🎥" : post.category === "powerpoint" ? "📊" : "🇦🇪"}
           </div>
         )}
         <div style={{ padding: "1.5rem" }}>

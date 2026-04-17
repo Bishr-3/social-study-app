@@ -16,6 +16,7 @@ const categoryLabels: Record<string, { label: string; emoji: string; badge: stri
   poem: { label: "قصيدة شعرية", emoji: "✍️", badge: "badge-poem" },
   story: { label: "قصة قصيرة", emoji: "📖", badge: "badge-story" },
   free: { label: "فكرة حرة", emoji: "🌟", badge: "badge-free" },
+  powerpoint: { label: "عرض تقديمي (PowerPoint)", emoji: "📊", badge: "badge-powerpoint" },
 };
 
 function formatDate(dateStr: string) {
@@ -106,6 +107,38 @@ export default function PostDetailPage() {
               alt={post.title}
               className="post-detail-image"
             />
+          )}
+
+          {post.video_url && (
+            <video
+              controls
+              src={post.video_url}
+              style={{
+                width: "100%",
+                borderRadius: "12px",
+                marginBottom: "2rem",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+              }}
+            />
+          )}
+
+          {post.document_url && (
+            <a
+              href={post.document_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary"
+              style={{
+                display: "block",
+                textAlign: "center",
+                padding: "1.2rem",
+                marginBottom: "2rem",
+                fontSize: "1.1rem",
+                borderRadius: "12px",
+              }}
+            >
+              📥 عرض وتحميل ملف المشاركة (PowerPoint / PDF)
+            </a>
           )}
 
           <h1 className="post-detail-title">{post.title}</h1>

@@ -15,7 +15,9 @@ export type Post = {
   content: string;
   category: string;
   image_url: string | null;
-  likes: number;     // NEW
+  video_url?: string;
+  document_url?: string;
+  likes: number;
   created_at: string;
 };
 
