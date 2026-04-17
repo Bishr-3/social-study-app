@@ -200,6 +200,17 @@ export default function SubmitPage() {
 
       setIsSuccess(true);
       trackAchievement('posts');
+
+      // Save name for private notifications
+      try {
+        const existingNames = JSON.parse(localStorage.getItem("linked_student_names") || "[]");
+        if (!existingNames.includes(studentName.trim())) {
+          existingNames.push(studentName.trim());
+          localStorage.setItem("linked_student_names", JSON.stringify(existingNames));
+        }
+      } catch (e) {
+        console.error("Storage error:", e);
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
       setError(message);
