@@ -57,6 +57,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, newLikes });
     }
 
+    case "updatePost": {
+      const { title, content, imageUrl } = await req.json();
+      if (!postId) return NextResponse.json({ error: "Missing postId" }, { status: 400 });
+      
+      const updateData: any = {};
+      if (title !== undefined) updateData.title = title;
+      if (content !== undefined) updateData.content = content;
+      if (imageUrl !== undefined) updateData.image_url = imageUrl;
+
+      const { error } = await supabaseAdmin
+        .from("posts")
+        .update(updateData)
+        .eq("id", postId);
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: true });
+    }
+
     default:
       return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   }
