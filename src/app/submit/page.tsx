@@ -17,9 +17,31 @@ export default function SubmitPage() {
   const [category, setCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState(false);
   const [error, setError] = useState("");
+
+  function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        setError("حجم صورة الغلاف يجب أن يكون أقل من 5 ميجابايت");
+        return;
+      }
+      setCoverFile(selectedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverPreview(reader.result as string);
+      reader.readAsDataURL(selectedFile);
+      setError("");
+    }
+  }
+
+  function removeCover() {
+    setCoverFile(null);
+    setCoverPreview(null);
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = e.target.files?.[0];
@@ -81,29 +103,40 @@ export default function SubmitPage() {
       let videoUrl: string | null = null;
       let documentUrl: string | null = null;
 
-      if (file) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        let filePath = `posts/${fileName}`;
-        let bucket = "post-images";
+      // 1. Upload Cover Image (Optional for video/powerpoint, mandatory for others)
+      const targetCover = coverFile || (category !== "video" && category !== "powerpoint" ? file : null);
+      
+      if (targetCover && targetCover.type.startsWith("image/")) {
+        const fileExt = targetCover.name.split(".").pop();
+        const fileName = `${Date.now()}-cover-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `posts/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from("post-images")
+          .upload(filePath, targetCover);
 
-        if (category === "video") {
-          bucket = "post-videos";
-        } else if (category === "powerpoint") {
-          bucket = "post-documents";
-        }
+        if (uploadError) throw new Error("فشل في رفع صورة الغلاف: " + uploadError.message);
+        
+        const { data: urlData } = supabase.storage.from("post-images").getPublicUrl(filePath);
+        imageUrl = urlData.publicUrl;
+      }
+
+      // 2. Upload Main Content File (For video or powerpoint)
+      if (file && (category === "video" || category === "powerpoint")) {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Date.now()}-content-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `posts/${fileName}`;
+        const bucket = category === "video" ? "post-videos" : "post-documents";
 
         const { error: uploadError } = await supabase.storage
           .from(bucket)
-          .upload(filePath, file, { cacheControl: "3600", upsert: false });
+          .upload(filePath, file);
 
-        if (uploadError) throw new Error("فشل في رفع الملف: " + uploadError.message);
+        if (uploadError) throw new Error("فشل في رفع ملف المشاركة: " + uploadError.message);
 
         const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(filePath);
-
         if (category === "video") videoUrl = urlData.publicUrl;
-        else if (category === "powerpoint") documentUrl = urlData.publicUrl;
-        else imageUrl = urlData.publicUrl;
+        else documentUrl = urlData.publicUrl;
       }
 
       // Insert post
@@ -232,10 +265,38 @@ export default function SubmitPage() {
               />
             </div>
 
-            {/* File Upload */}
+            {/* Additional Cover Image (For video and powerpoint only) */}
+            {(category === "video" || category === "powerpoint") && (
+              <div className="form-group fade-in-up">
+                <label className="form-label">
+                  🖼️ صورة غلاف المشاركة (اختياري)
+                </label>
+                <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
+                   هذه الصورة ستظهر في الصفحة الرئيسية بدلاً من الأيقونة (يمكنك أخذ لقطة شاشة لأول صفحة في ملفك)
+                </p>
+                <div className="file-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverChange}
+                  />
+                  <div className="file-upload-icon">🖼️</div>
+                  <div className="file-upload-text">اضغط لرفع صورة الغلاف</div>
+                </div>
+
+                {coverPreview && (
+                  <div className="image-preview" style={{ marginTop: "1rem" }}>
+                    <img src={coverPreview} alt="معاينة الغلاف" />
+                    <button type="button" className="remove-image" onClick={removeCover}>✕</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Main File Upload */}
             <div className="form-group">
               <label className="form-label">
-                {category === "video" ? "🎥 ملف الفيديو" : category === "powerpoint" ? "📊 ملف العرض التقديمي" : "🖼️ صورة المشاركة"}
+                {category === "video" ? "🎥 ملف الفيديو الأساسي" : category === "powerpoint" ? "📊 ملف العرض التقديمي الأساسي" : "🖼️ صورة المشاركة"}
               </label>
               <div className="file-upload">
                 <input
@@ -244,15 +305,17 @@ export default function SubmitPage() {
                   accept={category === "video" ? "video/*" : category === "powerpoint" ? ".pptx,.pdf" : "image/*"}
                   onChange={handleFileChange}
                 />
-                <div className="file-upload-icon">📤</div>
+                <div className="file-upload-icon">
+                  {category === "video" ? "🎥" : category === "powerpoint" ? "📄" : "📤"}
+                </div>
                 <div className="file-upload-text">
-                  {category === "video" ? "اضغط هنا لمعرض الفيديوهات أو اسحب الفيديو" : category === "powerpoint" ? "اضغط هنا لاختيار البوربوينت أو PDF" : "اضغط هنا أو اسحب الصورة لرفعها"}
+                  {category === "video" ? "اضغط لرفع الفيديو (MP4)" : category === "powerpoint" ? "اضغط لرفع ملف البوربوينت أو PDF" : "اضغط هنا أو اسحب الصورة لرفعها"}
                 </div>
                 <div
                   className="file-upload-text"
                   style={{ fontSize: "0.75rem", marginTop: "0.3rem" }}
                 >
-                  {category === "video" ? "الحد الأقصى: 100 ميجابايت (MP4, WEBM)" : category === "powerpoint" ? "الحد الأقصى: 25 ميجابايت لـ PowerPoint و 10 ميجابايت لـ PDF" : "الحد الأقصى: 5 ميجابايت (JPG, PNG, WEBP)"}
+                  {category === "video" ? "الحد الأقصى: 100 ميجابايت" : category === "powerpoint" ? "الحد الأقصى: 25 ميجابايت لـ PowerPoint و 10 ميجابايت لـ PDF" : "الحد الأقصى: 5 ميجابايت"}
                 </div>
               </div>
 
@@ -261,7 +324,7 @@ export default function SubmitPage() {
                   {filePreview ? (
                     <img src={filePreview} alt="معاينة" />
                   ) : (
-                    <div style={{ color: "var(--uae-gold)", fontWeight: "bold" }}>📄 تم اختيار: {file.name}</div>
+                    <div style={{ color: "var(--uae-gold)", fontWeight: "bold" }}>✅ تم اختيار ملف: {file.name}</div>
                   )}
                   <button
                     type="button"
