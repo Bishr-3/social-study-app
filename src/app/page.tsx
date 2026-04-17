@@ -87,23 +87,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 2rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem" }}>
+      <section style={{ maxWidth: "1300px", margin: "0 auto", padding: "0 2rem" }}>
+        <div style={{ 
+          display: "flex", 
+          flexWrap: "wrap", 
+          justifyContent: "center", 
+          gap: "1.2rem",
+          direction: "rtl"
+        }}>
           {[
             { emoji: "🎥", title: "فيديو إبداعي", desc: "تصوير فيديو يعبر عن حب الوطن" },
-            { emoji: "🎨", title: "تصميم بالذكاء الاصطناعي", desc: "تصميم بوستر احترافي بأدوات الذكاء الاصطناعي" },
+            { emoji: "📊", title: "عرض تقديمي", desc: "بوربوينت أو ملف PDF تعريفي" },
+            { emoji: "🎨", title: "تصميم إبداعي", desc: "بوستر احترافي أو عمل فني" },
             { emoji: "✍️", title: "قصيدة شعرية", desc: "أبيات تعبر عن الفخر بالوطن" },
-            { emoji: "📖", title: "قصة قصيرة مع رسومات", desc: "قصة عن موقف وطني مع رسومات" },
-            { emoji: "🌟", title: "فكرة حرة مبتكرة", desc: "أي عمل إبداعي يعبر عن فخرك بالإمارات" },
+            { emoji: "📖", title: "قصة قصيرة", desc: "قصة وطنية مع رسومات" },
+            { emoji: "🌟", title: "فكرة حرة", desc: "أي عمل إبداعي مبتكر" },
           ].map((item, i) => (
             <div
               key={i}
               className="glass-card fade-in-up"
-              style={{ padding: "1.5rem", textAlign: "center", animationDelay: `${i * 0.1}s` }}
+              style={{ 
+                padding: "1.2rem", 
+                textAlign: "center", 
+                animationDelay: `${i * 0.1}s`,
+                flex: "1 1 180px",
+                maxWidth: "220px",
+                minHeight: "180px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
             >
-              <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>{item.emoji}</div>
-              <h3 style={{ color: "var(--text-primary)", fontWeight: 700, marginBottom: "0.5rem" }}>{item.title}</h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", lineHeight: 1.7 }}>{item.desc}</p>
+              <div style={{ fontSize: "2.2rem", marginBottom: "0.5rem" }}>{item.emoji}</div>
+              <h3 style={{ color: "var(--text-primary)", fontWeight: 700, marginBottom: "0.4rem", fontSize: "1rem" }}>{item.title}</h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.75rem", lineHeight: 1.5 }}>{item.desc}</p>
             </div>
           ))}
         </div>
