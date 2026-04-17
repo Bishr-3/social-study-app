@@ -46,7 +46,7 @@ export default function PostCard({ post }: { post: Post }) {
 
   async function handleLike(e: React.MouseEvent) {
     e.preventDefault();
-    if (!isAdmin && liked) return;
+    // Allow multiple likes for all students (Admin can already do this)
 
     try {
       const res = await fetch("/api/posts/like", {

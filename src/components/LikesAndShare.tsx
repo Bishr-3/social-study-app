@@ -39,7 +39,8 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
 
   async function handleAction(action: "increment" | "decrement") {
     if (loading) return;
-    if (!isAdmin && liked && action === "increment") return;
+    // Allow everyone to increment multiple times, but only Admin can decrement
+    if (action === "decrement" && !isAdmin) return;
 
     setLoading(true);
 
