@@ -393,10 +393,40 @@ export default function HomePage() {
           <p className="section-subtitle">اضغط على الإمارة لمشاهدة مشاركات طلابها</p>
           <div className="section-line" />
         </div>
-        <UAEMap 
-          onSelectEmirate={setSelectedEmirate} 
-          selectedEmirate={selectedEmirate} 
-        />
+        {/* Official Map Image */}
+        <div style={{ 
+          maxWidth: "800px", 
+          margin: "0 auto", 
+          padding: "0 1rem",
+          position: "relative"
+        }}>
+          <img 
+            src="/images/uae-official-map.png" 
+            alt="خريطة الإمارات الرسمية" 
+            style={{ 
+              width: "100%", 
+              height: "auto", 
+              borderRadius: "20px",
+              boxShadow: "0 15px 50px rgba(0,0,0,0.15)",
+              border: "1px solid var(--glass-border)"
+            }}
+          />
+          <div style={{
+            position: "absolute",
+            bottom: "1.5rem",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "rgba(255,255,255,0.8)",
+            padding: "0.4rem 1rem",
+            borderRadius: "50px",
+            fontSize: "0.8rem",
+            color: "var(--text-secondary)",
+            border: "1px solid var(--glass-border)",
+            backdropFilter: "blur(5px)"
+          }}>
+            📍 الخريطة السياسية الرسمية
+          </div>
+        </div>
       </section>
 
       <AnimatePresence>
