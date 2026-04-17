@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Share2, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
@@ -14,11 +14,22 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+    if (likedPosts.includes(postId)) {
+      setLiked(true);
+    }
+  }, [postId]);
+
   async function handleLike() {
     if (liked) return;
 
     setLiked(true);
     setLikes((prev) => prev + 1);
+
+    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+    likedPosts.push(postId);
+    localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
 
     // Call Supabase RPC
     await supabase.rpc("increment_like", { post_id: postId });

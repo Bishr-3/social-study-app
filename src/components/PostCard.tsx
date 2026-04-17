@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import type { Post } from "@/lib/supabase";
 import { Heart } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
   video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
@@ -23,6 +25,29 @@ function formatDate(dateStr: string) {
 
 export default function PostCard({ post }: { post: Post }) {
   const cat = categoryLabels[post.category] || categoryLabels.free;
+  const [likes, setLikes] = useState(post.likes || 0);
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+    if (likedPosts.includes(post.id)) {
+      setLiked(true);
+    }
+  }, [post.id]);
+
+  async function handleLike(e: React.MouseEvent) {
+    e.preventDefault();
+    if (liked) return;
+
+    setLiked(true);
+    setLikes((prev) => prev + 1);
+
+    const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+    likedPosts.push(post.id);
+    localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
+
+    await supabase.rpc("increment_like", { post_id: post.id });
+  }
 
   return (
     <Link href={`/post/${post.id}`} style={{ textDecoration: "none" }}>
@@ -91,9 +116,29 @@ export default function PostCard({ post }: { post: Post }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="student-name">👤 {post.student_name}</span>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "0.2rem", color: "var(--uae-red)", fontSize: "0.9rem", fontWeight: "bold" }}>
-                <Heart size={16} fill="var(--uae-red)" stroke="none" /> {post.likes || 0}
-              </span>
+              <div 
+                onClick={handleLike}
+                style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  gap: "0.2rem", 
+                  color: liked ? "var(--uae-red)" : "var(--text-secondary)", 
+                  fontSize: "0.9rem", 
+                  fontWeight: "bold",
+                  padding: "0.3rem 0.6rem",
+                  borderRadius: "20px",
+                  background: liked ? "rgba(206,17,38,0.1)" : "var(--glass-bg)",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!liked) e.currentTarget.style.color = "var(--uae-red)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!liked) e.currentTarget.style.color = "var(--text-secondary)";
+                }}
+              >
+                <Heart size={16} fill={liked ? "var(--uae-red)" : "none"} stroke={liked ? "var(--uae-red)" : "currentColor"} /> {likes}
+              </div>
               <span
                 style={{
                   color: "var(--uae-green)",
