@@ -1,0 +1,51 @@
+"use client";
+
+import { useState } from "react";
+import { Heart, Share2, Check } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+
+interface Props {
+  postId: string;
+  initialLikes: number;
+}
+
+export default function LikesAndShare({ postId, initialLikes }: Props) {
+  const [likes, setLikes] = useState(initialLikes);
+  const [liked, setLiked] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function handleLike() {
+    if (liked) return;
+
+    setLiked(true);
+    setLikes((prev) => prev + 1);
+
+    // Call Supabase RPC
+    await supabase.rpc("increment_like", { post_id: postId });
+  }
+
+  function handleShare() {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  return (
+    <div className="interaction-bar">
+      <button
+        onClick={handleLike}
+        className={`interaction-item ${liked ? "liked" : ""}`}
+      >
+        <Heart size={20} fill={liked ? "var(--uae-red)" : "none"} />
+        <span>{likes} إعجاب</span>
+      </button>
+
+      <button onClick={handleShare} className="interaction-item">
+        {copied ? <Check size={20} color="var(--uae-green)" /> : <Share2 size={20} />}
+        <span style={{ color: copied ? "var(--uae-green)" : "inherit" }}>
+          {copied ? "تم النسخ!" : "مشاركة"}
+        </span>
+      </button>
+    </div>
+  );
+}

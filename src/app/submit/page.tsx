@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Particles from "@/components/Particles";
 import { useRouter } from "next/navigation";
+import confetti from "canvas-confetti";
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -95,11 +96,18 @@ export default function SubmitPage() {
       }
 
       // Show success
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#CE1126', '#00732F', '#ffffff', '#000000', '#C8A951']
+      });
+
       setToast(true);
       setTimeout(() => {
         setToast(false);
         router.push("/");
-      }, 2000);
+      }, 3000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
       setError(message);

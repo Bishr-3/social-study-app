@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   return (
@@ -10,6 +11,7 @@ export default function Navbar() {
         <span>فخورون بالإمارات</span>
       </Link>
       <div className="nav-links">
+        <ThemeToggle />
         <Link href="/" className="btn-secondary" style={{ padding: "0.5rem 1.2rem", fontSize: "0.85rem" }}>
           🏠 الرئيسية
         </Link>

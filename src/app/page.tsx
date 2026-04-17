@@ -7,11 +7,14 @@ import Footer from "@/components/Footer";
 import Particles from "@/components/Particles";
 import PostCard from "@/components/PostCard";
 import Link from "next/link";
+import { Search } from "lucide-react";
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
 
   useEffect(() => {
     fetchPosts();
@@ -30,8 +33,17 @@ export default function HomePage() {
     setLoading(false);
   }
 
-  const filteredPosts =
-    filter === "all" ? posts : posts.filter((p) => p.category === filter);
+  const filteredPosts = posts
+    .filter((p) => filter === "all" || p.category === filter)
+    .filter((p) =>
+      searchQuery === ""
+        ? true
+        : p.title.includes(searchQuery) || p.student_name.includes(searchQuery)
+    )
+    .sort((a, b) => {
+      if (sortBy === "top") return (b.likes || 0) - (a.likes || 0);
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
 
   const categories = [
     { value: "all", label: "الكل", emoji: "📋" },
@@ -47,7 +59,6 @@ export default function HomePage() {
       <Particles />
       <Navbar />
 
-      {/* Hero Section */}
       <section className="hero-section" style={{ marginTop: "60px" }}>
         <div className="hero-flag">
           <div className="flag-red" />
@@ -73,7 +84,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Info Cards */}
       <section style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 2rem" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1.5rem" }}>
           {[
@@ -86,30 +96,35 @@ export default function HomePage() {
             <div
               key={i}
               className="glass-card fade-in-up"
-              style={{
-                padding: "1.5rem",
-                textAlign: "center",
-                animationDelay: `${i * 0.1}s`,
-              }}
+              style={{ padding: "1.5rem", textAlign: "center", animationDelay: `${i * 0.1}s` }}
             >
               <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>{item.emoji}</div>
-              <h3 style={{ color: "white", fontWeight: 700, marginBottom: "0.5rem" }}>{item.title}</h3>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.85rem", lineHeight: 1.7 }}>{item.desc}</p>
+              <h3 style={{ color: "var(--text-primary)", fontWeight: 700, marginBottom: "0.5rem" }}>{item.title}</h3>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", lineHeight: 1.7 }}>{item.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Posts Section */}
       <section id="posts" style={{ paddingTop: "2rem" }}>
         <div className="section-header">
-          <h2 className="section-title">مشاركات الطلاب</h2>
+          <h2 className="section-title text-primary">مشاركات الطلاب</h2>
           <p className="section-subtitle">إبداعات طلابنا في فعالية فخورون بالإمارات</p>
           <div className="section-line" />
         </div>
 
-        {/* Category Filter */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", padding: "1rem 2rem", flexWrap: "wrap" }}>
+        <div className="search-bar-container" style={{ padding: "0 2rem" }}>
+          <Search className="search-icon" size={20} />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="ابحث باسم الطالب أو عنوان المشاركة..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", padding: "1rem 2rem", flexWrap: "wrap", alignItems: "center" }}>
           {categories.map((cat) => (
             <button
               key={cat.value}
@@ -118,9 +133,9 @@ export default function HomePage() {
                 padding: "0.5rem 1.2rem",
                 borderRadius: "50px",
                 border: "1px solid",
-                borderColor: filter === cat.value ? "var(--uae-gold)" : "rgba(255,255,255,0.1)",
+                borderColor: filter === cat.value ? "var(--uae-gold)" : "var(--glass-border)",
                 background: filter === cat.value ? "rgba(200,169,81,0.15)" : "transparent",
-                color: filter === cat.value ? "var(--uae-gold)" : "rgba(255,255,255,0.5)",
+                color: filter === cat.value ? "var(--uae-gold)" : "var(--text-secondary)",
                 cursor: "pointer",
                 fontFamily: "'Cairo', sans-serif",
                 fontWeight: 600,
@@ -131,23 +146,35 @@ export default function HomePage() {
               {cat.emoji} {cat.label}
             </button>
           ))}
+          <div style={{ width: "1px", height: "30px", background: "var(--glass-border)", margin: "0 0.5rem" }} />
+          <button
+            onClick={() => setSortBy(sortBy === "newest" ? "top" : "newest")}
+            style={{
+              padding: "0.5rem 1.2rem",
+              borderRadius: "50px",
+              border: "1px solid var(--uae-gold)",
+              background: "transparent",
+              color: "var(--uae-gold)",
+              cursor: "pointer",
+              fontFamily: "'Cairo', sans-serif",
+              fontWeight: 700,
+              fontSize: "0.85rem",
+              display: "flex", alignItems: "center", gap: "0.4rem"
+            }}
+          >
+            {sortBy === "newest" ? "🕒 الأحدث" : "🔥 أعلى الإعجابات"}
+          </button>
         </div>
 
         {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner" />
-          </div>
+          <div className="loading-spinner"><div className="spinner" /></div>
         ) : filteredPosts.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">📭</div>
-            <p className="empty-state-text">
-              {posts.length === 0
-                ? "لا توجد مشاركات بعد… كن أول من يُشارك!"
-                : "لا توجد مشاركات في هذا التصنيف"}
+            <p className="empty-state-text text-secondary">
+              {posts.length === 0 ? "لا توجد مشاركات بعد… كن أول من يُشارك!" : "لم يتم العثور على نتائج تطابق بحثك"}
             </p>
-            <Link href="/submit" className="btn-primary">
-              ✨ أضف مشاركتك الآن
-            </Link>
+            <Link href="/submit" className="btn-primary">✨ أضف مشاركتك الآن</Link>
           </div>
         ) : (
           <div className="posts-grid stagger-children">

@@ -7,6 +7,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Particles from "@/components/Particles";
 import Link from "next/link";
+import LikesAndShare from "@/components/LikesAndShare";
+import CommentsSection from "@/components/CommentsSection";
 
 const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
   video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
@@ -122,6 +124,8 @@ export default function PostDetailPage() {
 
           <div className="post-detail-content">{post.content}</div>
 
+          <LikesAndShare postId={post.id} initialLikes={post.likes || 0} />
+
           {/* UAE decoration */}
           <div
             style={{
@@ -129,7 +133,7 @@ export default function PostDetailPage() {
               alignItems: "center",
               justifyContent: "center",
               gap: "1rem",
-              marginTop: "3rem",
+              marginTop: "2.5rem",
               paddingTop: "2rem",
               borderTop: "1px solid var(--glass-border)",
             }}
@@ -142,7 +146,7 @@ export default function PostDetailPage() {
                 borderRadius: "2px",
               }}
             />
-            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "1.5rem" }}>
+            <span style={{ color: "rgba(150,150,150,0.5)", fontSize: "1.5rem" }}>
               🇦🇪
             </span>
             <div
@@ -157,13 +161,16 @@ export default function PostDetailPage() {
           <p
             style={{
               textAlign: "center",
-              color: "rgba(255,255,255,0.3)",
-              marginTop: "1rem",
+              color: "rgba(150,150,150,0.5)",
+              marginTop: "0.5rem",
               fontStyle: "italic",
+              fontSize: "0.9rem"
             }}
           >
             فخورون بالإمارات ✨
           </p>
+
+          <CommentsSection postId={post.id} />
         </article>
       </div>
 

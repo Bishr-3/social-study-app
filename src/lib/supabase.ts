@@ -15,5 +15,14 @@ export type Post = {
   content: string;
   category: string;
   image_url: string | null;
+  likes: number;     // NEW
+  created_at: string;
+};
+
+export type Comment = {
+  id: string;
+  post_id: string;
+  student_name: string;
+  content: string;
   created_at: string;
 };

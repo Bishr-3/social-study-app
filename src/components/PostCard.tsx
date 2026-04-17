@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Post } from "@/lib/supabase";
+import { Heart } from "lucide-react";
 
 const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
   video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
@@ -60,9 +61,9 @@ export default function PostCard({ post }: { post: Post }) {
           </div>
           <h3
             style={{
-              fontSize: "1.2rem",
+              fontSize: "1.15rem",
               fontWeight: 700,
-              color: "white",
+              color: "var(--text-primary)",
               marginBottom: "0.75rem",
               lineHeight: 1.5,
               display: "-webkit-box",
@@ -75,29 +76,34 @@ export default function PostCard({ post }: { post: Post }) {
           </h3>
           <p
             style={{
-              color: "rgba(255,255,255,0.5)",
+              color: "var(--text-secondary)",
               fontSize: "0.9rem",
               lineHeight: 1.8,
               display: "-webkit-box",
               WebkitLineClamp: 3,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
-              marginBottom: "1rem",
+              marginBottom: "1.5rem",
             }}
           >
             {post.content}
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <span className="student-name">👤 {post.student_name}</span>
-            <span
-              style={{
-                color: "var(--uae-green)",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-              }}
-            >
-              اقرأ المزيد ←
-            </span>
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "0.2rem", color: "var(--uae-red)", fontSize: "0.9rem", fontWeight: "bold" }}>
+                <Heart size={16} fill="var(--uae-red)" stroke="none" /> {post.likes || 0}
+              </span>
+              <span
+                style={{
+                  color: "var(--uae-green)",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                }}
+              >
+                اقرأ المزيد ←
+              </span>
+            </div>
           </div>
         </div>
       </article>
