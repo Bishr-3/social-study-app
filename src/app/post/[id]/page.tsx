@@ -62,10 +62,19 @@ export default async function PostPage({ params }: PostPageProps) {
     "headline": post.title,
     "image": post.image_url ? [post.image_url] : [],
     "datePublished": post.created_at,
+    "dateModified": post.created_at, // Use same if no update date exists
     "author": [{
       "@type": "Person",
       "name": post.student_name,
     }],
+    "publisher": {
+      "@type": "Organization",
+      "name": "المدرسة الأهلية الخيرية",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://socialstudyncs.space/logo.png"
+      }
+    },
     "description": post.content.substring(0, 200),
   };
 
