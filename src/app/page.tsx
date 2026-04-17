@@ -60,11 +60,13 @@ export default function HomePage() {
       <Navbar />
 
       <section className="hero-section" style={{ marginTop: "60px" }}>
-        <div className="hero-flag">
-          <div className="flag-red" />
-          <div className="flag-green" />
-          <div className="flag-white" />
-          <div className="flag-black" />
+        <div className="hero-flag-custom">
+          <div className="flag-red-bar" />
+          <div className="flag-stripes">
+            <div className="flag-green-stripe" />
+            <div className="flag-white-stripe" />
+            <div className="flag-black-stripe" />
+          </div>
         </div>
         <h1 className="hero-title">فخورون بالإمارات 🇦🇪</h1>
         <p className="hero-subtitle">

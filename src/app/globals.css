@@ -541,3 +541,110 @@ body::before {
 .footer-credit { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem; }
 .footer-names { font-weight: 700; font-size: 1rem; color: var(--uae-gold); }
 .footer-school { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem; }
+
+/* 🌟 Real UAE Flag Design */
+.hero-flag-custom {
+  display: flex;
+  direction: ltr; /* Force LTR so red is correctly on the left according to international flag rules */
+  width: 140px;
+  height: 70px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(200, 169, 81, 0.3);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  margin: 1.5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-flag-custom:hover {
+  transform: scale(1.1) rotate(2deg);
+  box-shadow: 0 0 45px rgba(200, 169, 81, 0.5);
+}
+
+.flag-red-bar {
+  width: 25%;
+  height: 100%;
+  background-color: var(--uae-red);
+}
+
+.flag-stripes {
+  width: 75%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.flag-green-stripe { background-color: var(--uae-green); flex: 1; }
+.flag-white-stripe { background-color: #ffffff; flex: 1; }
+.flag-black-stripe { background-color: #000000; flex: 1; }
+
+/* 📱 Mobile Responsiveness */
+@media (max-width: 768px) {
+  /* Navbar Tweaks */
+  .navbar {
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+  
+  .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Increase top margin so content isn't hidden under double-row navbar */
+  .hero-section {
+    margin-top: 100px !important;
+    min-height: 40vh;
+    padding: 1.5rem 1rem;
+  }
+  
+  .post-detail {
+    margin-top: 120px !important;
+  }
+
+  /* Text & Buttons Scaling */
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 0.6rem 1.2rem !important;
+    font-size: 0.9rem !important;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Sections Adjustments */
+  .posts-grid {
+    padding: 1rem;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .glass-card {
+    padding: 1.5rem !important;
+  }
+  
+  /* Search Bar Adjustments */
+  .search-bar-container {
+    padding: 0 1rem;
+  }
+  
+  .search-input {
+    font-size: 0.9rem;
+  }
+}
