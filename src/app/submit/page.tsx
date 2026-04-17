@@ -26,15 +26,22 @@ export default function SubmitPage() {
     if (selectedFile) {
       // Size limits
       const maxVideoSize = 100 * 1024 * 1024; // 100MB
-      const maxDocSize = 25 * 1024 * 1024;    // 25MB
+      const maxPdfSize = 10 * 1024 * 1024;    // 10MB
+      const maxPptxSize = 25 * 1024 * 1024;   // 25MB
       const maxImgSize = 5 * 1024 * 1024;     // 5MB
 
       if (category === "video" && selectedFile.size > maxVideoSize) {
         setError("حجم الفيديو يجب أن يكون أقل من 100 ميجابايت");
         return;
-      } else if (category === "powerpoint" && selectedFile.size > maxDocSize) {
-        setError("حجم الملف يجب أن يكون أقل من 25 ميجابايت");
-        return;
+      } else if (category === "powerpoint") {
+        const isPdf = selectedFile.name.toLowerCase().endsWith(".pdf");
+        const limit = isPdf ? maxPdfSize : maxPptxSize;
+        const limitName = isPdf ? "10" : "25";
+        
+        if (selectedFile.size > limit) {
+          setError(`حجم ملف الـ ${isPdf ? "PDF" : "PowerPoint"} يجب أن يكون أقل من ${limitName} ميجابايت`);
+          return;
+        }
       } else if (category !== "video" && category !== "powerpoint" && selectedFile.size > maxImgSize) {
         setError("حجم الصورة يجب أن يكون أقل من 5 ميجابايت");
         return;
@@ -245,7 +252,7 @@ export default function SubmitPage() {
                   className="file-upload-text"
                   style={{ fontSize: "0.75rem", marginTop: "0.3rem" }}
                 >
-                  {category === "video" ? "الحد الأقصى: 100 ميجابايت (MP4, WEBM)" : category === "powerpoint" ? "الحد الأقصى: 25 ميجابايت (PPTX, PDF)" : "الحد الأقصى: 5 ميجابايت (JPG, PNG, WEBP)"}
+                  {category === "video" ? "الحد الأقصى: 100 ميجابايت (MP4, WEBM)" : category === "powerpoint" ? "الحد الأقصى: 25 ميجابايت لـ PowerPoint و 10 ميجابايت لـ PDF" : "الحد الأقصى: 5 ميجابايت (JPG, PNG, WEBP)"}
                 </div>
               </div>
 
