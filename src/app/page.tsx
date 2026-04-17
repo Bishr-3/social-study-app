@@ -1,24 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase, type Post } from "@/lib/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Particles from "@/components/Particles";
 import PostCard from "@/components/PostCard";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, Trophy, Map as MapIcon, Play } from "lucide-react";
+import UAEMap from "@/components/UAEMap";
+import ReelsPlayer from "@/components/ReelsPlayer";
+import IntroScreen from "@/components/IntroScreen";
+import StoriesBar from "@/components/StoriesBar";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
+  const [selectedEmirate, setSelectedEmirate] = useState("الكل");
+  const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
+  const [stats, setStats] = useState({ total_posts: 0, total_students: 0, total_likes: 0 });
 
   useEffect(() => {
     fetchPosts();
+    fetchStats();
   }, []);
+
+  async function fetchStats() {
+    const { data, error } = await supabase.from("site_stats").select("*").single();
+    if (!error && data) {
+      setStats(data);
+    }
+  }
 
   async function fetchPosts() {
     setLoading(true);
@@ -35,6 +53,7 @@ export default function HomePage() {
 
   const filteredPosts = posts
     .filter((p) => filter === "all" || p.category === filter)
+    .filter((p) => selectedEmirate === "الكل" || p.emirate === selectedEmirate)
     .filter((p) =>
       searchQuery === ""
         ? true
@@ -87,6 +106,14 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Stories Bar */}
+      <section style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 1rem" }}>
+        <StoriesBar 
+          posts={posts} 
+          onSelectPost={(id) => router.push(`/post/${id}`)} 
+        />
+      </section>
+
       <section style={{ maxWidth: "1300px", margin: "0 auto", padding: "0 2rem" }}>
         <div style={{ 
           display: "flex", 
@@ -124,6 +151,129 @@ export default function HomePage() {
               <p style={{ color: "var(--text-secondary)", fontSize: "0.75rem", lineHeight: 1.5 }}>{item.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Leaderboard Section */}
+      <section style={{ maxWidth: "1200px", margin: "4rem auto 2rem", padding: "0 2rem" }}>
+        <div className="section-header">
+          <h2 className="section-title"><Trophy size={32} style={{ verticalAlign: "middle", marginLeft: "0.5rem", color: "var(--uae-gold)" }} /> لوحة أبطال الإبداع</h2>
+          <p className="section-subtitle">المشاركات الأكثر تميزاً وتفاعلاً</p>
+          <div className="section-line" />
+        </div>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
+          {posts.sort((a,b) => (b.likes || 0) - (a.likes || 1)).slice(0, 3).map((post, idx) => (
+            <motion.div
+              key={post.id}
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.2 }}
+              className="glass-card"
+              style={{
+                position: "relative",
+                padding: "1.5rem",
+                border: idx === 0 ? "2px solid var(--uae-gold)" : "1px solid var(--glass-border)",
+                boxShadow: idx === 0 ? "0 0 30px rgba(200, 169, 81, 0.2)" : "var(--glass-shadow)"
+              }}
+            >
+              <div style={{
+                position: "absolute",
+                top: "-15px",
+                right: "20px",
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                background: idx === 0 ? "var(--uae-gold)" : idx === 1 ? "#C0C0C0" : "#CD7F32",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: "1.2rem",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                zIndex: 2
+              }}>
+                {idx + 1}
+              </div>
+              <PostCard post={post} />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Reels Entry Point */}
+      <section style={{ textAlign: "center", margin: "4rem 0" }}>
+        <button 
+          onClick={() => {
+            const index = posts.findIndex(p => p.category === "video");
+            if (index !== -1) setActiveReelIndex(index);
+          }}
+          className="btn-primary" 
+          style={{ 
+            padding: "1.5rem 3rem", 
+            borderRadius: "50px", 
+            fontSize: "1.2rem",
+            background: "linear-gradient(45deg, var(--uae-red), var(--uae-green))",
+            boxShadow: "0 10px 40px rgba(206, 17, 38, 0.3)"
+          }}
+        >
+          <Play size={24} fill="white" /> عرض فيديوهات الطلاب (Reels Style)
+        </button>
+      </section>
+
+      {/* Live Stats Section */}
+      <section style={{ maxWidth: "1200px", margin: "3rem auto", padding: "0 2rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-around", gap: "1rem", flexWrap: "wrap" }}>
+          {[
+            { label: "مشاركة إبداعية", value: stats.total_posts, emoji: "🚀" },
+            { label: "مبدع ومبدعة", value: stats.total_students, emoji: "👤" },
+            { label: "إعجاب وفخر", value: stats.total_likes, emoji: "❤️" },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              style={{
+                flex: "1 1 200px",
+                background: "var(--glass-bg)",
+                padding: "1.5rem",
+                borderRadius: "20px",
+                textAlign: "center",
+                border: "1px solid var(--glass-border)",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.05)"
+              }}
+            >
+              <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{stat.emoji}</div>
+              <div style={{ fontSize: "2.5rem", fontWeight: 800, color: "var(--uae-gold)" }}>{stat.value}</div>
+              <div style={{ fontSize: "0.9rem", color: "var(--text-secondary)", fontWeight: 600 }}>{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Daily Challenge Section */}
+      <section style={{ maxWidth: "1200px", margin: "0 auto 3rem", padding: "0 2rem" }}>
+        <div 
+          className="glass-card fade-in-up" 
+          style={{ 
+            padding: "2rem", 
+            border: "2px dashed var(--uae-gold)", 
+            textAlign: "center",
+            background: "rgba(200, 169, 81, 0.05)"
+          }}
+        >
+          <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>🎯</div>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--uae-gold)", marginBottom: "0.5rem" }}>تحدي اليوم الإبداعي</h2>
+          <p style={{ color: "var(--text-primary)", fontSize: "1.1rem", marginBottom: "1.5rem" }}>
+            "اكتب جملة واحدة تعبر فيها عن فخرك بجواز السفر الإماراتي كأقوى جواز في العالم"
+          </p>
+          <Link href="/submit" className="btn-secondary" style={{ padding: "0.8rem 2rem", borderColor: "var(--uae-gold)", color: "var(--uae-gold)" }}>
+            ⚡ شارك في التحدي الآن
+          </Link>
         </div>
       </section>
 
@@ -205,6 +355,29 @@ export default function HomePage() {
           </div>
         )}
       </section>
+
+      {/* Map Section */}
+      <section style={{ margin: "4rem 0", background: "rgba(0,0,0,0.02)", padding: "4rem 0" }}>
+        <div className="section-header">
+          <h2 className="section-title"><MapIcon size={32} style={{ verticalAlign: "middle", marginLeft: "0.5rem", color: "var(--uae-green)" }} /> اكتشف إبداعات الإمارات</h2>
+          <p className="section-subtitle">اضغط على الإمارة لمشاهدة مشاركات طلابها</p>
+          <div className="section-line" />
+        </div>
+        <UAEMap 
+          onSelectEmirate={setSelectedEmirate} 
+          selectedEmirate={selectedEmirate} 
+        />
+      </section>
+
+      <AnimatePresence>
+        {activeReelIndex !== null && (
+          <ReelsPlayer 
+            posts={posts} 
+            initialIndex={activeReelIndex} 
+            onClose={() => setActiveReelIndex(null)} 
+          />
+        )}
+      </AnimatePresence>
 
       <Footer />
     </>

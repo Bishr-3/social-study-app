@@ -14,10 +14,13 @@ export type Post = {
   title: string;
   content: string;
   category: string;
+  emirate: string;
   image_url: string | null;
   video_url?: string;
   document_url?: string;
   likes: number;
+  teacher_rating?: number;
+  is_teacher_choice?: boolean;
   created_at: string;
 };
 

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import type { Post } from "@/lib/supabase";
-import { Heart, Trash2 } from "lucide-react";
+import { Heart, Trash2, Star, Award } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
+import { useTeacherStatus } from "@/hooks/useTeacherStatus";
 
 const categoryLabels: Record<string, { label: string; emoji: string; badge: string }> = {
   video: { label: "فيديو إبداعي", emoji: "🎥", badge: "badge-video" },
@@ -30,7 +31,10 @@ export default function PostCard({ post }: { post: Post }) {
   const [likes, setLikes] = useState(post.likes || 0);
   const [liked, setLiked] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [rating, setRating] = useState(post.teacher_rating || 0);
+  const [isChoice, setIsChoice] = useState(post.is_teacher_choice || false);
   const { isAdmin } = useAdminStatus();
+  const { isTeacher } = useTeacherStatus();
 
   useEffect(() => {
     const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
@@ -68,6 +72,27 @@ export default function PostCard({ post }: { post: Post }) {
     }
   }
 
+  async function handleRate(newRating: number) {
+    if (!isTeacher) return;
+    setRating(newRating);
+    await fetch("/api/teacher/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "rate", postId: post.id, rating: newRating }),
+    });
+  }
+
+  async function toggleChoice() {
+    if (!isTeacher) return;
+    const newVal = !isChoice;
+    setIsChoice(newVal);
+    await fetch("/api/teacher/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "toggleChoice", postId: post.id, isChoice: newVal }),
+    });
+  }
+
   if (isDeleted) return null;
 
   return (
@@ -99,6 +124,42 @@ export default function PostCard({ post }: { post: Post }) {
             {post.category === "video" ? "🎥" : post.category === "powerpoint" ? "📊" : "🇦🇪"}
           </div>
         )}
+        
+        {/* Badges for Choice/Rating */}
+        <div style={{ position: "absolute", top: "1rem", right: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem", zIndex: 10 }}>
+          {isChoice && (
+            <div className="badge-poem" style={{ 
+              background: "var(--uae-gold)", 
+              color: "white", 
+              padding: "0.2rem 0.8rem", 
+              borderRadius: "50px", 
+              fontSize: "0.7rem",
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.3rem",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
+            }}>
+              <Award size={14} /> اختيار المعلم
+            </div>
+          )}
+          {rating > 0 && (
+            <div style={{ 
+              background: "rgba(0,0,0,0.6)", 
+              backdropFilter: "blur(5px)",
+              color: "var(--uae-gold)", 
+              padding: "0.2rem 0.8rem", 
+              borderRadius: "50px", 
+              fontSize: "0.7rem",
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.2rem"
+            }}>
+              <Star size={14} fill="var(--uae-gold)" /> {rating}/5
+            </div>
+          )}
+        </div>
         <div style={{ padding: "1.5rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <span className={`category-badge ${cat.badge}`}>
@@ -194,6 +255,54 @@ export default function PostCard({ post }: { post: Post }) {
               </span>
             </div>
           </div>
+          
+          {/* Teacher Controls */}
+          {isTeacher && (
+            <div style={{ 
+              marginTop: "1rem", 
+              paddingTop: "1rem", 
+              borderTop: "1px solid var(--glass-border)",
+              display: "flex", 
+              flexDirection: "column",
+              gap: "0.8rem"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--uae-gold)" }}>🎓 تقييم المعلم:</span>
+                <div style={{ display: "flex", gap: "0.2rem" }}>
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star 
+                      key={s} 
+                      size={18} 
+                      onClick={(e) => { e.preventDefault(); handleRate(s); }}
+                      fill={s <= rating ? "var(--uae-gold)" : "none"}
+                      style={{ cursor: "pointer", color: "var(--uae-gold)" }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={(e) => { e.preventDefault(); toggleChoice(); }}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "8px",
+                  background: isChoice ? "rgba(200, 169, 81, 0.1)" : "transparent",
+                  border: "1px solid var(--uae-gold)",
+                  color: "var(--uae-gold)",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.4rem"
+                }}
+              >
+                <Award size={16} fill={isChoice ? "var(--uae-gold)" : "none"} />
+                {isChoice ? "إلغاء اختيار المعلم" : "تمييز كـ اختيار المعلم"}
+              </button>
+            </div>
+          )}
         </div>
       </article>
     </Link>

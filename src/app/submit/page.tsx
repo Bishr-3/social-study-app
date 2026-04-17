@@ -7,6 +7,11 @@ import Footer from "@/components/Footer";
 import Particles from "@/components/Particles";
 import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
+import AIStudio from "@/components/AIStudio";
+import Certificate from "@/components/Certificate";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import { useEffect } from "react";
 
 export default function SubmitPage() {
   const router = useRouter();
@@ -15,11 +20,15 @@ export default function SubmitPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [emirate, setEmirate] = useState("أبوظبي");
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const certificateRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
   const [toast, setToast] = useState(false);
   const [error, setError] = useState("");
 
@@ -87,6 +96,29 @@ export default function SubmitPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
+  const downloadCertificate = async () => {
+    if (!certificateRef.current) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff"
+      });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("l", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`شهادة_مشاركة_${studentName}.pdf`);
+    } catch (err) {
+      console.error("Certificate error:", err);
+      alert("حدث خطأ أثناء تحميل الشهادة");
+    }
+    setDownloading(false);
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -146,6 +178,7 @@ export default function SubmitPage() {
           title: title.trim(),
           content: content.trim(),
           category,
+          emirate,
           image_url: imageUrl,
           video_url: videoUrl,
           document_url: documentUrl,
@@ -164,11 +197,7 @@ export default function SubmitPage() {
         colors: ['#CE1126', '#00732F', '#ffffff', '#000000', '#C8A951']
       });
 
-      setToast(true);
-      setTimeout(() => {
-        setToast(false);
-        router.push("/");
-      }, 3000);
+      setIsSuccess(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
       setError(message);
@@ -191,6 +220,7 @@ export default function SubmitPage() {
           <div className="section-line" />
         </div>
 
+        {!isSuccess ? (
         <form onSubmit={handleSubmit} className="form-container">
           <div
             className="glass-card fade-in-up"
@@ -231,6 +261,39 @@ export default function SubmitPage() {
                 <option value="story">📖 قصة قصيرة مع رسومات</option>
                 <option value="free">🌟 فكرة حرة مبتكرة</option>
                 <option value="powerpoint">📊 عرض تقديمي (PowerPoint)</option>
+              </select>
+            </div>
+
+            {/* AI Studio Assistant */}
+            {category && (
+              <AIStudio 
+                category={category} 
+                onApply={(t, c) => {
+                  setTitle(t);
+                  setContent(c);
+                }} 
+              />
+            )}
+
+            {/* Emirate Selection */}
+            <div className="form-group">
+              <label className="form-label" htmlFor="emirate">
+                📍 الإمارة <span style={{ color: "var(--uae-red)" }}>*</span>
+              </label>
+              <select
+                id="emirate"
+                className="form-select"
+                value={emirate}
+                onChange={(e) => setEmirate(e.target.value)}
+                required
+              >
+                <option value="أبوظبي">أبوظبي</option>
+                <option value="دبي">دبي</option>
+                <option value="الشارقة">الشارقة</option>
+                <option value="عجمان">عجمان</option>
+                <option value="أم القيوين">أم القيوين</option>
+                <option value="رأس الخيمة">رأس الخيمة</option>
+                <option value="الفجيرة">الفجيرة</option>
               </select>
             </div>
 
@@ -379,6 +442,47 @@ export default function SubmitPage() {
             </button>
           </div>
         </form>
+        ) : (
+          <div className="glass-card fade-in-up" style={{ maxWidth: "600px", margin: "2rem auto", padding: "3rem", textAlign: "center" }}>
+            <div style={{ fontSize: "5rem", marginBottom: "1.5rem" }}>🎉</div>
+            <h2 className="text-2xl font-bold mb-4" style={{ color: "var(--uae-gold)" }}>مبروك يا بطل!</h2>
+            <p className="text-text-secondary mb-8">
+              شكراً لمشاركتك المتميزة في "فخورون بالإمارات". تم استلام عملك بنجاح وسوف يظهر للجميع قريباً.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <button 
+                onClick={downloadCertificate}
+                disabled={downloading}
+                className="btn-primary w-full flex items-center justify-center gap-2"
+                style={{ 
+                  background: "linear-gradient(45deg, var(--uae-gold), #b3903d)", 
+                  color: "white", 
+                  padding: "1.2rem",
+                  fontSize: "1.1rem"
+                }}
+              >
+                {downloading ? "⏳ جارٍ التحميل..." : "📜 تحميل شهادة المشاركة الفخرية"}
+              </button>
+
+              <button
+                onClick={() => router.push("/")}
+                className="btn-secondary w-full"
+                style={{ padding: "1rem" }}
+              >
+                🏠 العودة للصفحة الرئيسية
+              </button>
+            </div>
+
+            {/* Hidden Certificate for capture */}
+            <Certificate 
+              ref={certificateRef}
+              studentName={studentName}
+              category={category === 'video' ? 'فيديو' : category === 'powerpoint' ? 'عرض تقديمي' : 'إبداع وطني'}
+              date={new Date().toLocaleDateString('ar-AE')}
+            />
+          </div>
+        )}
       </div>
 
       <Footer />
