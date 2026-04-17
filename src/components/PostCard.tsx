@@ -144,92 +144,59 @@ export default function PostCard({ post }: { post: Post }) {
           </div>
         )}
         
-        {/* Badges for Choice/Rating */}
-        <div style={{ position: "absolute", top: "1rem", right: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem", zIndex: 10 }}>
-          {isChoice && (
-            <div className="badge-poem" style={{ 
-              background: "var(--uae-gold)", 
-              color: "white", 
-              padding: "0.2rem 0.8rem", 
-              borderRadius: "50px", 
-              fontSize: "0.7rem",
-              fontWeight: 800,
-              display: "flex",
-              alignItems: "center",
-              gap: "0.3rem",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
-            }}>
-              <Award size={14} /> اختيار المعلم
-            </div>
-          )}
-          {rating > 0 && (
-            <div style={{ 
-              background: "rgba(0,0,0,0.6)", 
-              backdropFilter: "blur(5px)",
-              color: "var(--uae-gold)", 
-              padding: "0.2rem 0.8rem", 
-              borderRadius: "50px", 
-              fontSize: "0.7rem",
-              fontWeight: 800,
-              display: "flex",
-              alignItems: "center",
-              gap: "0.2rem"
-            }}>
-              <Star size={14} fill="var(--uae-gold)" /> {rating}/5
-            </div>
-          )}
-          {/* Conditional Special Badges for WOW factor */}
-          {post.likes > 7 && post.category === 'design' && (
-            <div style={{ 
-              background: "linear-gradient(45deg, #FF69B4, #FFA500)", 
-              color: "white", 
-              padding: "0.2rem 0.8rem", 
-              borderRadius: "50px", 
-              fontSize: "0.7rem",
-              fontWeight: 900,
-              boxShadow: "0 4px 15px rgba(255,105,180,0.3)",
-              border: "1px solid white",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
-            }}>
-              🎖️ أفضل تصميم
-            </div>
-          )}
-          {post.likes > 7 && post.category === 'poem' && (
-            <div style={{ 
-              background: "linear-gradient(45deg, #4A90E2, #50E3C2)", 
-              color: "white", 
-              padding: "0.2rem 0.8rem", 
-              borderRadius: "50px", 
-              fontSize: "0.7rem",
-              fontWeight: 900,
-              boxShadow: "0 4px 15px rgba(74,144,226,0.3)",
-              border: "1px solid white",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
-            }}>
-              🎤 شاعر متميز
-            </div>
-          )}
-          {post.likes > 10 && (
-            <div style={{ 
-              background: "linear-gradient(45deg, #FFD700, #FFA500)", 
-              color: "white", 
-              padding: "0.2rem 0.8rem", 
-              borderRadius: "50px", 
-              fontSize: "0.7rem",
-              fontWeight: 900,
-              boxShadow: "0 4px 15px rgba(255,165,0,0.3)",
-              border: "1px solid white",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)"
-            }}>
-              ✨ مبدع الأسبوع
-            </div>
-          )}
-        </div>
         <div style={{ padding: "1.5rem" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-            <span className={`category-badge ${cat.badge}`}>
-              {cat.emoji} {cat.label}
-            </span>
+          {/* Merged Badges and Meta Area */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <span className={`category-badge ${cat.badge}`}>
+                {cat.emoji} {cat.label}
+              </span>
+              
+              {isChoice && (
+                <div className="badge-poem" style={{ 
+                  background: "var(--uae-gold)", 
+                  color: "white", 
+                  padding: "0.25rem 0.8rem", 
+                  borderRadius: "50px", 
+                  fontSize: "0.75rem",
+                  fontWeight: 800,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.3rem",
+                }}>
+                  <Award size={14} /> اختيار المعلم
+                </div>
+              )}
+
+              {rating > 0 && (
+                <div style={{ 
+                  background: "rgba(0,0,0,0.05)", 
+                  color: "var(--uae-gold)", 
+                  padding: "0.25rem 0.8rem", 
+                  borderRadius: "50px", 
+                  fontSize: "0.75rem",
+                  fontWeight: 800,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.2rem",
+                  border: "1px solid rgba(200, 169, 81, 0.2)"
+                }}>
+                  <Star size={14} fill="var(--uae-gold)" /> {rating}/5
+                </div>
+              )}
+
+              {/* Merit Badges moved here */}
+              {post.likes > 7 && post.category === 'design' && (
+                <div style={{ background: "linear-gradient(45deg, #FF69B4, #FFA500)", color: "white", padding: "0.25rem 0.8rem", borderRadius: "50px", fontSize: "0.75rem", fontWeight: 900 }}>
+                  🎖️ أفضل تصميم
+                </div>
+              )}
+              {post.likes > 10 && (
+                <div style={{ background: "linear-gradient(45deg, #FFD700, #FFA500)", color: "white", padding: "0.25rem 0.8rem", borderRadius: "50px", fontSize: "0.75rem", fontWeight: 900 }}>
+                  ✨ مبدع الأسبوع
+                </div>
+              )}
+            </div>
             <span className="post-date">📅 {formatDate(post.created_at)}</span>
           </div>
           <h3
@@ -261,30 +228,28 @@ export default function PostCard({ post }: { post: Post }) {
           >
             {post.content}
           </p>
-          {isAdmin && (
-            <div style={{ position: "absolute", top: "1rem", left: "1rem", zIndex: 10 }}>
-              <button
-                onClick={handleDelete}
-                style={{
-                  background: "rgba(206,17,38,0.8)",
-                  border: "none",
-                  borderRadius: "8px",
-                  color: "white",
-                  padding: "0.4rem",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.3)"
-                }}
-                title="حذف المنشور"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          )}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span className="student-name">👤 {post.student_name}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span className="student-name">👤 {post.student_name}</span>
+              {isAdmin && (
+                <button
+                  onClick={handleDelete}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--uae-red)",
+                    cursor: "pointer",
+                    padding: "0.2rem",
+                    display: "flex",
+                    alignItems: "center",
+                    opacity: 0.7
+                  }}
+                  title="حذف المنشور"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
             <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
                 <div 

@@ -200,20 +200,21 @@ export default function HomePage() {
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.2 }}
-              className="glass-card"
+              className="glass-card leaderboard-card-wrapper"
               style={{
                 position: "relative",
-                padding: "1.5rem",
+                padding: "0.5rem",
                 border: idx === 0 ? "2px solid var(--uae-gold)" : "1px solid var(--glass-border)",
-                boxShadow: idx === 0 ? "0 0 30px rgba(200, 169, 81, 0.2)" : "var(--glass-shadow)"
+                boxShadow: idx === 0 ? "0 0 30px rgba(200, 169, 81, 0.2)" : "var(--glass-shadow)",
+                overflow: "visible"
               }}
             >
-              <div style={{
+              <div className="card-ranking-badge" style={{
                 position: "absolute",
-                top: "-15px",
-                right: "20px",
-                width: "40px",
-                height: "40px",
+                top: "-18px",
+                right: "-10px",
+                width: "50px",
+                height: "50px",
                 borderRadius: "50%",
                 background: idx === 0 ? "var(--uae-gold)" : idx === 1 ? "#C0C0C0" : "#CD7F32",
                 display: "flex",
@@ -221,9 +222,10 @@ export default function HomePage() {
                 justifyContent: "center",
                 color: "white",
                 fontWeight: "bold",
-                fontSize: "1.2rem",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                zIndex: 2
+                fontSize: "1.5rem",
+                boxShadow: "0 8px 20px rgba(0,0,0,0.4)",
+                zIndex: 50,
+                border: "3px solid white"
               }}>
                 {idx + 1}
               </div>

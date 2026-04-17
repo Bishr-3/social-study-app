@@ -233,15 +233,10 @@ body::before {
   position: relative;
 }
 
-.card-image-wrapper::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60%;
-  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-  pointer-events: none;
+/* Remove image overlay gradient */
+
+.leaderboard-card-wrapper {
+  overflow: visible !important;
 }
 
 /* Category Badge */
