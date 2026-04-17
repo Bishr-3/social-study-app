@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { supabase, type Comment } from "@/lib/supabase";
-import { MessageCircle, Trash2, Award } from "lucide-react";
+import { MessageCircle, Trash2, Award, Zap } from "lucide-react";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useTeacherStatus } from "@/hooks/useTeacherStatus";
 import { trackAchievement } from "./Achievements";
+import { filterModeration } from "@/lib/moderation";
+import { toast } from "react-hot-toast";
 
 export default function CommentsSection({ postId }: { postId: string }) {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -37,15 +39,42 @@ export default function CommentsSection({ postId }: { postId: string }) {
     setLoading(false);
   }
 
+  // Realtime Subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel(`comments-${postId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'comments',
+          filter: `post_id=eq.${postId}`
+        },
+        (payload) => {
+          const newComment = payload.new as Comment;
+          setComments((prev) => {
+            // Avoid duplicate if the user who posted already added it locally
+            if (prev.find(c => c.id === newComment.id)) return prev;
+            return [...prev, newComment];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [postId]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !content.trim()) return;
-    setSubmitting(true);
+    const cleanContent = filterModeration(content.trim());
 
     const newComment = {
       post_id: postId,
       student_name: isTeacher ? "الأستاذ صهيب سيد" : name.trim(),
-      content: content.trim(),
+      content: cleanContent,
       is_teacher: isTeacher
     };
 

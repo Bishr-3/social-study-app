@@ -25,6 +25,30 @@ export async function POST(request: Request) {
     
     if (error) throw error;
     
+    // 3. Create Notification for Likes (Optimistic)
+    if (action === "increment") {
+      try {
+        // Fetch post owner info
+        const { data: postData } = await supabaseAdmin
+          .from("posts")
+          .select("student_name")
+          .eq("id", postId)
+          .single();
+
+        if (postData) {
+          await supabaseAdmin.from("notifications").insert({
+            post_id: postId,
+            type: 'like',
+            message: `شخص ما أعجب بمشاركتك!`,
+            student_name: postData.student_name,
+            actor_name: 'مبدع آخر'
+          });
+        }
+      } catch (e) {
+        console.error("Notification Error:", e);
+      }
+    }
+    
     return NextResponse.json({ success: true, isAdmin });
 
   } catch (error: any) {

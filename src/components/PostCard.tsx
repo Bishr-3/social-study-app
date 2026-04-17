@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import type { Post } from "@/lib/supabase";
 import { Heart, Trash2, Star, Award, Minus } from "lucide-react";
@@ -118,12 +119,15 @@ export default function PostCard({ post }: { post: Post }) {
     <Link href={`/post/${post.id}`} style={{ textDecoration: "none" }}>
       <article className="glass-card" style={{ cursor: "pointer" }}>
         {post.image_url && (
-          <div className="card-image-wrapper">
-            <img
+          <div className="card-image-wrapper" style={{ height: "220px", position: "relative" }}>
+            <Image
               src={post.image_url}
               alt={post.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="card-image"
-              loading="lazy"
+              style={{ objectFit: "cover", objectPosition: "top" }}
+              priority={false}
             />
           </div>
         )}

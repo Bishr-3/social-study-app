@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 import { useRouter } from "next/navigation";
 
@@ -22,6 +23,7 @@ export default function Navbar() {
         <span>فخورون بالإمارات</span>
       </Link>
       <div className="nav-links">
+        <NotificationBell />
         <ThemeToggle />
         <Link href="/" className="btn-secondary" style={{ padding: "0.5rem 1.2rem", fontSize: "0.85rem" }}>
           🏠 الرئيسية
