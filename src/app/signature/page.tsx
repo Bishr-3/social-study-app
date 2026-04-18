@@ -58,6 +58,13 @@ export default function CreativeSignaturePage() {
     }
 
     // Generate signature elements
+    const achievements: string[] = [];
+    
+    if (totalLikes > 50) achievements.push("نجم التفاعل"); 
+    if (categories.length > 2) achievements.push("فنان متعدد المواهب");
+    if (studentPosts.length > 3) achievements.push("منتج متميز");
+    if (avgLikes > 10) achievements.push("محبوب من الجمهور");
+
     const signatureData = {
       personality,
       emoji,
@@ -68,16 +75,9 @@ export default function CreativeSignaturePage() {
         categoriesCount: categories.length,
         avgLikes: Math.round(avgLikes * 10) / 10
       },
-      achievements: [],
+      achievements,
       style: "modern"
     };
-
-    // Add achievements
-    if (totalLikes > 50) signatureData.achievements.push("نجم التفاعل");
-    if (categories.length > 2) signatureData.achievements.push("فنان متعدد المواهب");
-    if (studentPosts.length > 3) signatureData.achievements.push("منتج متميز");
-    if (avgLikes > 10) signatureData.achievements.push("محبوب من الجمهور");
-
     // Save to database
     const { data: existing } = await supabase
       .from("creative_signatures")

@@ -4,8 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { Museum, Eye, MessageCircle, Star, Share2 } from "lucide-react";
-import type { Post } from "@/lib/supabase";
+import { Archive, Eye, MessageCircle, Star, Share2 } from "lucide-react";
+import type { Comment, Post } from "@/lib/supabase";
+
+type MuseumDetail = {
+  student_name: string;
+  featured_works?: unknown[];
+  museum_theme?: string;
+  visitor_count?: number;
+};
 
 const museumThemes = {
   classic: { name: "المتحف الكلاسيكي", bg: "bg-gradient-to-br from-amber-100 to-yellow-200" },
@@ -14,19 +21,13 @@ const museumThemes = {
 };
 
 export default function PersonalMuseumPage({ params }: { params: { studentName: string } }) {
-  const [museum, setMuseum] = useState<any>(null);
+  const [museum, setMuseum] = useState<MuseumDetail | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const studentName = decodeURIComponent(params.studentName);
-
-  useEffect(() => {
-    loadMuseum();
-    loadPosts();
-    incrementVisitorCount();
-  }, [studentName]);
 
   const loadMuseum = async () => {
     const { data, error } = await supabase
@@ -83,6 +84,16 @@ export default function PersonalMuseumPage({ params }: { params: { studentName: 
     });
   };
 
+  useEffect(() => {
+    async function loadMuseumPage() {
+      await loadMuseum();
+      await loadPosts();
+      await incrementVisitorCount();
+    }
+
+    loadMuseumPage();
+  }, [studentName]);
+
   const addComment = async (postId: string) => {
     if (!newComment.trim()) return;
 
@@ -130,7 +141,7 @@ export default function PersonalMuseumPage({ params }: { params: { studentName: 
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 text-[var(--uae-red)] hover:text-[var(--uae-gold)] transition-colors">
-              <Museum className="w-5 h-5" />
+              <Archive className="w-5 h-5" />
               العودة للرئيسية
             </Link>
 

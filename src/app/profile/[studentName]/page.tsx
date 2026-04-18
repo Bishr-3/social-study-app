@@ -6,19 +6,50 @@ import { supabase } from "@/lib/supabase";
 import { User, Award, Heart, Calendar, TrendingUp, Download } from "lucide-react";
 import type { Post } from "@/lib/supabase";
 
+type CreativeProfileStats = {
+  totalPosts: number;
+  totalLikes: number;
+  avgLikes: number;
+  categories: number;
+  daysActive: number;
+  topCategory: string;
+};
+
+type AvatarData = {
+  avatar_parts?: Record<string, unknown>;
+};
+
+type SignatureData = {
+  signature_data?: {
+    name?: string;
+  };
+};
+
 export default function CreativeProfilePage({ params }: { params: { studentName: string } }) {
-  const [stats, setStats] = useState<any>({});
+  const [stats, setStats] = useState<CreativeProfileStats>({
+    totalPosts: 0,
+    totalLikes: 0,
+    avgLikes: 0,
+    categories: 0,
+    daysActive: 0,
+    topCategory: "غير محدد",
+  });
   const [posts, setPosts] = useState<Post[]>([]);
-  const [avatar, setAvatar] = useState<any>({});
-  const [signature, setSignature] = useState<any>({});
+  const [avatar, setAvatar] = useState<AvatarData>({});
+  const [signature, setSignature] = useState<SignatureData>({});
   const [loading, setLoading] = useState(true);
   const studentName = decodeURIComponent(params.studentName);
 
-  useEffect(() => {
-    loadProfileData();
-  }, [studentName]);
+  const getTopCategory = (posts: Post[]) => {
+    const categoryCount = posts.reduce((acc, post) => {
+      acc[post.category] = (acc[post.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-  const loadProfileData = async () => {
+    return Object.entries(categoryCount).sort(([,a], [,b]) => b - a)[0]?.[0] || "غير محدد";
+  };
+
+  async function loadProfileData() {
     // Load posts
     const { data: postsData } = await supabase
       .from("posts")
@@ -34,15 +65,13 @@ export default function CreativeProfilePage({ params }: { params: { studentName:
       const totalPosts = postsData.length;
       const avgLikes = totalPosts > 0 ? Math.round(totalLikes / totalPosts) : 0;
       const categories = [...new Set(postsData.map(p => p.category))];
-      const firstPost = postsData[postsData.length - 1];
-      const daysActive = firstPost ? Math.ceil((Date.now() - new Date(firstPost.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
       setStats({
         totalPosts,
         totalLikes,
         avgLikes,
         categories: categories.length,
-        daysActive,
+        daysActive: 0,
         topCategory: getTopCategory(postsData),
       });
     }
@@ -70,16 +99,15 @@ export default function CreativeProfilePage({ params }: { params: { studentName:
     }
 
     setLoading(false);
-  };
+  }
 
-  const getTopCategory = (posts: Post[]) => {
-    const categoryCount = posts.reduce((acc, post) => {
-      acc[post.category] = (acc[post.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  useEffect(() => {
+    async function loadProfile() {
+      await loadProfileData();
+    }
 
-    return Object.entries(categoryCount).sort(([,a], [,b]) => b - a)[0]?.[0] || "غير محدد";
-  };
+    loadProfile();
+  }, [studentName]);
 
   const generatePDF = () => {
     // Simple PDF generation (in real app, use a library)
@@ -132,7 +160,7 @@ ${posts.map(p => `- ${p.title} (${p.likes} إعجاب)`).join('\n')}
                 <h2 className="text-2xl md:text-4xl font-bold text-white">
                   {studentName}
                 </h2>
-                {signature.signature_data && (
+                {signature.signature_data?.name && (
                   <p className="text-white/80">علامة الإبداع: {signature.signature_data.name}</p>
                 )}
               </div>

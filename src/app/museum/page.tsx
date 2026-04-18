@@ -3,27 +3,33 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { Museum, Eye, Star, Users } from "lucide-react";
+import { Archive, Eye, Star } from "lucide-react";
+
+type MuseumItem = {
+  student_name: string;
+  visitor_count?: number;
+  featured_works?: unknown[];
+};
 
 export default function MuseumsPage() {
-  const [museums, setMuseums] = useState<any[]>([]);
+  const [museums, setMuseums] = useState<MuseumItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadMuseums();
-  }, []);
-
-  const loadMuseums = async () => {
+  async function loadMuseums() {
     const { data, error } = await supabase
       .from("personal_museums")
       .select("*")
       .order("visitor_count", { ascending: false });
 
     if (data) {
-      setMuseums(data);
+      setMuseums(data as MuseumItem[]);
     }
     setLoading(false);
-  };
+  }
+
+  useEffect(() => {
+    loadMuseums();
+  }, []);
 
   if (loading) {
     return (
@@ -39,7 +45,7 @@ export default function MuseumsPage() {
       <div className="bg-white/20 backdrop-blur-md border-b border-white/30">
         <div className="container mx-auto px-4 py-4">
           <Link href="/" className="flex items-center gap-2 text-[var(--uae-red)] hover:text-[var(--uae-gold)] transition-colors">
-            <Museum className="w-5 h-5" />
+            <Archive className="w-5 h-5" />
             العودة للرئيسية
           </Link>
         </div>

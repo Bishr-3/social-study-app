@@ -7,6 +7,13 @@ import { supabase } from "@/lib/supabase";
 import { Home, Share2, Eye, Palette } from "lucide-react";
 import type { Post } from "@/lib/supabase";
 
+type CreativeRoom = {
+  student_name: string;
+  room_theme: string;
+  featured_works: string[];
+  visitor_count: number;
+};
+
 const roomThemes = {
   desert: { name: "الصحراء الذهبية", bg: "bg-gradient-to-br from-yellow-200 to-orange-300" },
   ocean: { name: "المحيط الأزرق", bg: "bg-gradient-to-br from-blue-200 to-cyan-300" },
@@ -15,16 +22,10 @@ const roomThemes = {
 };
 
 export default function CreativeRoomPage({ params }: { params: { studentName: string } }) {
-  const [room, setRoom] = useState<any>(null);
+  const [room, setRoom] = useState<CreativeRoom | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const studentName = decodeURIComponent(params.studentName);
-
-  useEffect(() => {
-    loadRoom();
-    loadPosts();
-    incrementVisitorCount();
-  }, [studentName]);
 
   const loadRoom = async () => {
     const { data, error } = await supabase
@@ -47,6 +48,16 @@ export default function CreativeRoomPage({ params }: { params: { studentName: st
       setRoom(defaultRoom);
     }
   };
+
+  useEffect(() => {
+    async function fetchRoom() {
+      await loadRoom();
+      await loadPosts();
+      await incrementVisitorCount();
+    }
+
+    fetchRoom();
+  }, [studentName]);
 
   const loadPosts = async () => {
     const { data, error } = await supabase
@@ -75,7 +86,9 @@ export default function CreativeRoomPage({ params }: { params: { studentName: st
       .update({ room_theme: theme })
       .eq("student_name", studentName);
 
-    setRoom({ ...room, room_theme: theme });
+    if (room) {
+      setRoom({ ...room, room_theme: theme });
+    }
   };
 
   const shareRoom = () => {

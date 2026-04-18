@@ -29,8 +29,8 @@ async function updateAvatarWithLike(studentName: string) {
       .eq("student_name", studentName)
       .single();
 
-    let avatarParts = avatarData?.avatar_parts || {};
-    let totalLikes = (avatarData?.total_likes || 0) + 1;
+    const avatarParts = avatarData?.avatar_parts || {};
+    const totalLikes = (avatarData?.total_likes || 0) + 1;
 
     // Add new piece based on likes count
     const avatarOptions = {
@@ -70,7 +70,7 @@ async function updateAvatarWithLike(studentName: string) {
 
 export async function POST(request: Request) {
   try {
-    const { postId, action = "increment" } = await request.json();
+    const { postId, action = "increment" } = await request.json() as { postId: string; action?: string };
     const cookieStore = await cookies();
     const likeClientId = getLikeClientId(cookieStore);
     const user_hash = getUserHash(likeClientId);
@@ -133,9 +133,10 @@ export async function POST(request: Request) {
     attachLikeCookie(response, cookieStore, likeClientId);
     return response;
 
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     console.error("Like Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

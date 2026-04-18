@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, type Post } from "@/lib/supabase";
@@ -9,9 +10,7 @@ import Particles from "@/components/Particles";
 import PostCard from "@/components/PostCard";
 import Link from "next/link";
 import { Search, Trophy, Map as MapIcon, Play } from "lucide-react";
-import UAEMap from "@/components/UAEMap";
 import ReelsPlayer from "@/components/ReelsPlayer";
-import IntroScreen from "@/components/IntroScreen";
 import StoriesBar from "@/components/StoriesBar";
 import BehindTheScenes from "@/components/BehindTheScenes";
 import Achievements from "@/components/Achievements";
@@ -24,14 +23,9 @@ export default function HomePage() {
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
-  const [selectedEmirate, setSelectedEmirate] = useState("الكل");
+  const [selectedEmirate] = useState("الكل");
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const [stats, setStats] = useState({ total_posts: 0, total_students: 0, total_likes: 0 });
-
-  useEffect(() => {
-    fetchPosts();
-    fetchStats();
-  }, []);
 
   async function fetchStats() {
     const { data, error } = await supabase.from("site_stats").select("*").single();
@@ -52,6 +46,15 @@ export default function HomePage() {
     }
     setLoading(false);
   }
+
+  useEffect(() => {
+    async function loadData() {
+      await fetchPosts();
+      await fetchStats();
+    }
+
+    loadData();
+  }, []);
 
   const filteredPosts = posts
     .filter((p) => filter === "all" || p.category === filter)
@@ -328,7 +331,7 @@ export default function HomePage() {
           <div className="challenge-emoji">🎯</div>
           <h2 className="challenge-title">تحدي اليوم الإبداعي</h2>
           <p className="challenge-desc">
-            "اكتب جملة واحدة تعبر فيها عن فخرك بجواز السفر الإماراتي كأقوى جواز في العالم"
+            «اكتب جملة واحدة تعبر فيها عن فخرك بجواز السفر الإماراتي كأقوى جواز في العالم»
           </p>
           <Link href="/submit" className="btn-secondary challenge-btn">
             ⚡ شارك في التحدي الآن
@@ -400,11 +403,12 @@ export default function HomePage() {
           <div className="section-line" />
         </div>
         {/* Official Map Image */}
-        <div className="map-wrapper">
-          <img 
-            src="/images/uae-official-map.png" 
-            alt="خريطة الإمارات الرسمية" 
-            className="map-image"
+        <div className="map-wrapper relative h-[400px] lg:h-[500px]">
+          <Image
+            src="/images/uae-official-map.png"
+            alt="خريطة الإمارات الرسمية"
+            fill
+            className="map-image object-cover rounded-3xl"
           />
           <div className="map-badge">
             📍 الخريطة السياسية الرسمية

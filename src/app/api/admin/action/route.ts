@@ -131,7 +131,7 @@ export async function POST(req: Request) {
       if (!postId)
         return NextResponse.json({ error: "Missing postId" }, { status: 400 });
 
-      const updateData: any = {};
+      const updateData: Record<string, string | undefined> = {};
 
       if (title !== undefined) updateData.title = title;
       if (content !== undefined) updateData.content = content;

@@ -45,10 +45,6 @@ export default function AvatarPage({ params }: { params: { studentName: string }
   const [loading, setLoading] = useState(false);
   const studentName = decodeURIComponent(params.studentName);
 
-  useEffect(() => {
-    loadAvatar();
-  }, [studentName]);
-
   const loadAvatar = async () => {
     const { data, error } = await supabase
       .from("user_avatars")
