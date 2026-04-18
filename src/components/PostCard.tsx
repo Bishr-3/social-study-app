@@ -43,11 +43,43 @@ export default function PostCard({ post }: { post: Post }) {
     if (likedPosts.includes(post.id)) {
       setLiked(true);
     }
+
+    async function checkLikedStatus() {
+      try {
+        const res = await fetch(`/api/posts/like?postId=${post.id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.liked) {
+          setLiked(true);
+        }
+      } catch (error) {
+        console.error("Failed to check liked status:", error);
+      }
+    }
+
+    checkLikedStatus();
+
+    // Re-validate likes every 30 seconds to prevent tampering
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/posts/like?postId=${post.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLiked(data.liked);
+        }
+        // Also re-fetch post data to ensure likes count is accurate
+        // This would require passing a refresh function or using a global state
+      } catch (error) {
+        console.error("Periodic like validation failed:", error);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [post.id]);
 
   async function handleLike(e: React.MouseEvent) {
     e.preventDefault();
-    // Allow multiple likes for all students (Admin can already do this)
+    if (liked) return;
 
     try {
       const res = await fetch("/api/posts/like", {
@@ -71,6 +103,11 @@ export default function PostCard({ post }: { post: Post }) {
         setLikes(prev => prev + 1);
       } else if (data.error === "ALREADY_LIKED") {
         setLiked(true);
+        const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+        if (!likedPosts.includes(post.id)) {
+          likedPosts.push(post.id);
+          localStorage.setItem("liked_posts", JSON.stringify(likedPosts));
+        }
       }
     } catch (err) {
       console.error("Like Action Failed:", err);

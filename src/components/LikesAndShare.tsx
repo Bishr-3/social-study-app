@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Share2, Check, Minus } from "lucide-react";
 import { useAdminStatus } from "@/hooks/useAdminStatus";
 
@@ -16,8 +16,40 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
   const [loading, setLoading] = useState(false);
   const { isAdmin } = useAdminStatus();
 
+  useEffect(() => {
+    async function fetchLikedStatus() {
+      try {
+        const res = await fetch(`/api/posts/like?postId=${postId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.liked) {
+          setLiked(true);
+        }
+      } catch (error) {
+        console.error("Failed to load like status:", error);
+      }
+    }
+
+    fetchLikedStatus();
+
+    // Re-validate likes every 30 seconds to prevent tampering
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/posts/like?postId=${postId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLiked(data.liked);
+        }
+      } catch (error) {
+        console.error("Periodic like validation failed:", error);
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [postId]);
+
   async function handleLike() {
-    if (loading) return;
+    if (loading || liked) return;
 
     setLoading(true);
 
