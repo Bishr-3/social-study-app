@@ -20,6 +20,54 @@ function attachLikeCookie(response: NextResponse, requestCookies: Awaited<Return
   }
 }
 
+async function updateAvatarWithLike(studentName: string) {
+  try {
+    // Get current avatar
+    const { data: avatarData } = await supabaseAdmin
+      .from("user_avatars")
+      .select("*")
+      .eq("student_name", studentName)
+      .single();
+
+    let avatarParts = avatarData?.avatar_parts || {};
+    let totalLikes = (avatarData?.total_likes || 0) + 1;
+
+    // Add new piece based on likes count
+    const avatarOptions = {
+      headwear: ["ghutra", "taqiyah", "crown"],
+      clothing: ["dishdasha", "abaya", "military"],
+      accessory: ["flag", "falcon", "camel"],
+      background: ["burj", "ocean", "palace"]
+    };
+
+    // Simple logic: unlock pieces at certain like milestones
+    if (totalLikes >= 5 && !avatarParts.headwear) {
+      avatarParts.headwear = avatarOptions.headwear[Math.floor(Math.random() * avatarOptions.headwear.length)];
+    }
+    if (totalLikes >= 10 && !avatarParts.clothing) {
+      avatarParts.clothing = avatarOptions.clothing[Math.floor(Math.random() * avatarOptions.clothing.length)];
+    }
+    if (totalLikes >= 15 && !avatarParts.accessory) {
+      avatarParts.accessory = avatarOptions.accessory[Math.floor(Math.random() * avatarOptions.accessory.length)];
+    }
+    if (totalLikes >= 20 && !avatarParts.background) {
+      avatarParts.background = avatarOptions.background[Math.floor(Math.random() * avatarOptions.background.length)];
+    }
+
+    // Update avatar
+    await supabaseAdmin
+      .from("user_avatars")
+      .upsert({
+        student_name: studentName,
+        avatar_parts: avatarParts,
+        total_likes: totalLikes,
+        updated_at: new Date().toISOString(),
+      });
+  } catch (error) {
+    console.error("Error updating avatar:", error);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { postId, action = "increment" } = await request.json();
@@ -72,6 +120,9 @@ export async function POST(request: Request) {
             student_name: postData.student_name,
             actor_name: 'مبدع آخر'
           });
+
+          // Update avatar with new piece
+          await updateAvatarWithLike(postData.student_name);
         }
       } catch (e) {
         console.error("Notification Error:", e);

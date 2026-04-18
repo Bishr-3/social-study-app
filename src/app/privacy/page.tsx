@@ -49,54 +49,51 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--uae-red)] via-[var(--uae-gold)] to-[var(--uae-green)] py-8 md:py-16" dir="rtl">
-      <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-all duration-300 mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--uae-red)] via-[var(--uae-gold)] to-[var(--uae-green)] py-10 md:py-16" dir="rtl">
+      <div className="flex min-h-screen items-center justify-center px-4 py-10">
+        <div className="w-full max-w-6xl rounded-[40px] bg-white/95 backdrop-blur-xl border border-white/30 shadow-[0_35px_90px_rgba(0,0,0,0.18)] overflow-hidden">
+          <div className="bg-[rgba(255,255,255,0.18)] px-6 py-10 md:px-14 md:py-14 text-center">
+            <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-[rgba(255,255,255,0.24)] rounded-full text-slate-900 hover:bg-white transition-all duration-300 mb-6">
               <span>🔙 العودة للرئيسية</span>
             </Link>
-            <h1 className="text-4xl md:text-6xl font-black text-white mb-4 drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-4">
               سياسة الخصوصية
             </h1>
-            <p className="text-xl text-white/90 max-w-2xl mx-auto">
-              نحمي خصوصيتك ونضمن أمان بياناتك في منصة "فخورون بالإمارات"
+            <p className="text-lg md:text-xl text-slate-700 max-w-3xl mx-auto leading-relaxed">
+              نحمي خصوصيتك ونضمن أمان بياناتك في منصة "فخورون بالإمارات" من خلال سياسات واضحة وممارسات آمنة تتوافق مع القيم الوطنية.
             </p>
           </div>
 
-          {/* Content Cards */}
-          <div className="space-y-8">
+          <div className="space-y-8 px-6 pb-10 md:px-14 md:pb-14">
             {sections.map((section, index) => (
-              <div key={index} className="bg-white/95 backdrop-blur-lg rounded-3xl p-8 md:p-12 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-500">
-                <div className="flex items-center gap-4 mb-6">
+              <div key={index} className="bg-white rounded-3xl p-8 md:p-10 shadow-lg border border-slate-200 transition-all duration-300 hover:-translate-y-1">
+                <div className="flex flex-col md:flex-row md:items-center md:gap-4 mb-6">
                   {section.icon}
                   <h2 className="text-2xl md:text-3xl font-bold text-[var(--uae-red)]">
                     {section.title}
                   </h2>
                 </div>
-                <div className="text-gray-700 text-lg leading-relaxed">
+                <div className="text-slate-700 text-base md:text-lg leading-relaxed space-y-4">
                   {section.content}
                 </div>
               </div>
             ))}
-          </div>
 
-          {/* Contact Section */}
-          <div className="mt-16 bg-gradient-to-r from-[var(--uae-green)] to-[var(--uae-gold)] rounded-3xl p-8 md:p-12 text-center text-white">
-            <Phone className="w-12 h-12 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold mb-4">تواصل معنا</h2>
-            <p className="text-lg mb-8 opacity-90">
-              في حال وجود أي استفسارات أو طلبات تتعلق بالخصوصية، يمكن التواصل مع إدارة الموقع مباشرة عبر الواتساب:
-            </p>
-            <a 
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-[var(--uae-red)] font-bold rounded-full shadow-lg hover:scale-105 transition-transform duration-300"
-            >
-              📱 تواصل عبر الواتساب: 0502406519
-            </a>
+            <div className="bg-gradient-to-r from-[var(--uae-green)] to-[var(--uae-gold)] rounded-3xl p-8 text-center text-white shadow-xl">
+              <Phone className="w-12 h-12 mx-auto mb-4" />
+              <h2 className="text-3xl font-bold mb-4">تواصل معنا</h2>
+              <p className="text-lg mb-8 opacity-95 leading-relaxed">
+                في حال وجود أي استفسارات أو طلبات تتعلق بالخصوصية، يمكن التواصل مع إدارة الموقع مباشرة عبر الواتساب:
+              </p>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-white text-[var(--uae-red)] font-bold rounded-full shadow-lg hover:scale-105 transition-transform duration-300"
+              >
+                📱 تواصل عبر الواتساب: 0502406519
+              </a>
+            </div>
           </div>
         </div>
       </div>

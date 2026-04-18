@@ -167,6 +167,71 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* New Creative Features Section */}
+      <section className="features-section">
+        <div className="section-header">
+          <h2 className="section-title">✨ الميزات الإبداعية الجديدة</h2>
+          <p className="section-subtitle">استكشف عالم الإبداع الشخصي</p>
+          <div className="section-line" />
+        </div>
+
+        <div className="features-grid">
+          {[
+            { emoji: "👤", title: "الأفاتار الشخصي", desc: "خصص أفاتارك الإماراتي الفريد", link: "/avatar/زائر" },
+            { emoji: "🏠", title: "غرفة الإبداع", desc: "مساحة شخصية لعرض أعمالك", link: "/room/زائر" },
+            { emoji: "🏛️", title: "متحف الإبداع", desc: "استكشف أفضل الأعمال الإبداعية", link: "/museum" },
+            { emoji: "🤖", title: "المساعد الذكي", desc: "احصل على أفكار إبداعية ملهمة", link: "/ai-assistant" },
+            { emoji: "✍️", title: "التوقيع الإبداعي", desc: "اكتشف بصمتك الإبداعية الفريدة", link: "/signature" },
+            { emoji: "📊", title: "تحليل الإبداع", desc: "اكتشف نقاط قوتك الإبداعية", link: "/analysis" },
+            { emoji: "📣", title: "أعلن معنا", desc: "بدائل آمنة للإعلانات والشراكات المدرسية", link: "/advertise" },
+          ].map((item, i) => (
+            <Link
+              key={i}
+              href={item.link}
+              className="glass-card feature-card fade-in-up hover:scale-105 transition-transform"
+              style={{ animationDelay: `${i * 0.1}s` }}
+            >
+              <div className="feature-emoji">{item.emoji}</div>
+              <h3 className="feature-title">{item.title}</h3>
+              <p className="feature-desc">{item.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Sponsor & Advertising Section */}
+      <section className="ads-section">
+        <div className="section-header">
+          <h2 className="section-title">📣 فرص إعلانية وشراكات مدرسية</h2>
+          <p className="section-subtitle">لطلابنا، المدارس، والمؤسسات التي تريد الوصول إلى جمهور مبدع وآمن</p>
+          <div className="section-line" />
+        </div>
+
+        <div className="ads-grid">
+          <div className="glass-card ad-card">
+            <div className="ad-badge">طلاب</div>
+            <h3 className="ad-title">سجل مشروعك في الحملة</h3>
+            <p className="ad-desc">اعرض مشروعك أو فعالية مدرستك في صفحة مخصصة يصلها الطلاب والمعلمون بسهولة.</p>
+          </div>
+
+          <div className="glass-card ad-card">
+            <div className="ad-badge">شركات</div>
+            <h3 className="ad-title">باقات إعلانية آمنة</h3>
+            <p className="ad-desc">إعلانك يظهر في مكان مميز داخل الموقع مع ضمان تجربة نظيفة وآمنة للطلاب.</p>
+          </div>
+
+          <div className="glass-card ad-card">
+            <div className="ad-badge">شركاء</div>
+            <h3 className="ad-title">شراكات تعليمية</h3>
+            <p className="ad-desc">انضم لدعم المواهب الإماراتية مع عرض خاص للمؤسسات والمبادرات التعليمية.</p>
+          </div>
+        </div>
+
+        <div className="text-center mt-8">
+          <Link href="/advertise" className="btn-primary">اكتشف فرص الإعلان الآن</Link>
+        </div>
+      </section>
+
       {/* Leaderboard Section */}
       <section className="leaderboard-section">
         <div className="section-header">

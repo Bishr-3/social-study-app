@@ -23,6 +23,10 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning className="h-full antialiased">
       <head>
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="default-src 'self' https://pagead2.googlesyndication.com https://www.googletagmanager.com; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://pagead2.googlesyndication.com; connect-src 'self' https://api.supabase.co https://*.supabase.co; font-src 'self';"
+        />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6089432800736094"
