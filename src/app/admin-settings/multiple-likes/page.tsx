@@ -16,8 +16,7 @@ export default function MultipleLikesSettings() {
     const checkAdminStatus = async () => {
       try {
         const response = await fetch("/api/admin/check", {
-          method: "POST",
-          credentials: "include"
+        method: "GET",
         });
 
         if (!response.ok) {
