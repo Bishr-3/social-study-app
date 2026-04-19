@@ -25,7 +25,7 @@ export default function RootLayout({
       <head>
         <meta
           httpEquiv="Content-Security-Policy"
-          content="default-src 'self' https://pagead2.googlesyndication.com https://www.googletagmanager.com; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://pagead2.googlesyndication.com; connect-src 'self' https://api.supabase.co https://*.supabase.co; font-src 'self';"
+          content="default-src 'self' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://*.supabase.co; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://www.googletagmanager.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; img-src 'self' data: https://pagead2.googlesyndication.com https://*.supabase.co; connect-src 'self' https://api.supabase.co https://*.supabase.co wss://*.supabase.co; font-src 'self' https://fonts.gstatic.com https://r2cdn.perplexity.ai; media-src 'self' https://*.supabase.co;" 
         />
         <script
           async
