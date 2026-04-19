@@ -9,8 +9,9 @@ interface StoriesBarProps {
 }
 
 export default function StoriesBar({ posts, onSelectPost }: StoriesBarProps) {
-  // Take the 10 most recent posts (with or without images)
-  const storyPosts = posts.slice(0, 10);
+  // Prioritize posts that have a cover image or video thumbnail
+  const postsWithMedia = posts.filter((p) => p.image_url || p.video_url);
+  const storyPosts = (postsWithMedia.length ? postsWithMedia : posts).slice(0, 10);
 
   return (
     <div className="stories-bar-container" style={{

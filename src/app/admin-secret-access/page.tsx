@@ -23,8 +23,7 @@ export default function AdminLoginPage() {
       });
 
       if (res.ok) {
-        router.push("/");
-        router.refresh();
+        window.location.href = "/admin-settings/multiple-likes";
       } else {
         setError("كلمة المرور غير صحيحة");
         setPassword("");
