@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import Navbar from "@/components/Navbar";
+import Particles from "@/components/Particles";
 
 export default function MultipleLikesSettings() {
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
@@ -11,16 +13,22 @@ export default function MultipleLikesSettings() {
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
-  // Check admin status on mount
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
         const response = await fetch("/api/admin/check", {
-        method: "GET",
+          method: "GET",
+          credentials: "include"
         });
 
         if (!response.ok) {
-          // ليس admin - إعادة للصفحة الرئيسية
+          toast.error("❌ هذه الصفحة للـ Admin فقط!");
+          router.push("/");
+          return;
+        }
+
+        const data = await response.json();
+        if (!data.isAdmin) {
           toast.error("❌ هذه الصفحة للـ Admin فقط!");
           router.push("/");
           return;
@@ -37,7 +45,6 @@ export default function MultipleLikesSettings() {
     checkAdminStatus();
   }, [router]);
 
-  // Fetch current setting
   const fetchSetting = async () => {
     try {
       const response = await fetch("/api/admin/settings/multiple-likes", {
@@ -59,7 +66,6 @@ export default function MultipleLikesSettings() {
     }
   };
 
-  // Toggle setting
   const handleToggle = async () => {
     setSaving(true);
     try {
@@ -96,75 +102,91 @@ export default function MultipleLikesSettings() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-uae-red/10 to-uae-gold/10 p-8 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-uae-red mx-auto mb-4"></div>
-          <p className="text-gray-600">جاري التحميل...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-uae-red/10 to-uae-gold/10 p-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8 border border-uae-gold/20">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">إعدادات الإعجابات</h1>
-          <p className="text-gray-600 mb-8">التحكم بإمكانية عمل multiple likes من نفس المستخدم</p>
+    <>
+      <Particles />
+      <Navbar />
 
-          <div className="space-y-6">
-            {/* Current Status */}
-            <div className="p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">السماح بـ Multiple Likes</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    إذا تم التفعيل: يمكن للمستخدم عمل إعجابات متعددة على نفس المنشور
-                  </p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    إذا تم التعطيل: يسمح بإعجاب واحد فقط (الوضع الحالي)
+      <main className="min-h-screen bg-gradient-to-b from-[#05070f] via-[#070913] to-[#05070f] text-white pt-24 pb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[1.35fr_minmax(320px,0.65fr)]">
+            <section className="space-y-6">
+              <div className="glass-card p-8 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+                <div className="space-y-4">
+                  <p className="text-sm text-uae-gold font-semibold tracking-[0.25em] uppercase">إعدادات الإعجابات</p>
+                  <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">لوحة تحكم الأدمن</h1>
+                  <p className="text-slate-300 text-base sm:text-lg leading-8 max-w-3xl">
+                    هنا يمكنك تفعيل أو تعطيل ميزة <strong>Multiple Likes</strong> بسهولة، والتحكم في سلوك الإعجابات للطلاب دون أي حاجة للتعديل في قاعدة البيانات.
                   </p>
                 </div>
               </div>
-            </div>
 
-            {/* Status Badge */}
-            <div className="flex items-center gap-3">
-              <div className={`w-4 h-4 rounded-full ${isEnabled ? "bg-green-500" : "bg-red-500"}`}></div>
-              <span className={`text-lg font-semibold ${isEnabled ? "text-green-600" : "text-red-600"}`}>
-                {isEnabled ? "✅ مفعّل" : "❌ معطّل"}
-              </span>
-            </div>
+              <div className="glass-card p-8 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+                <div className="grid gap-5 sm:grid-cols-2 mb-6">
+                  <div className="p-5 rounded-[28px] bg-slate-950/80 border border-white/10">
+                    <p className="text-sm text-slate-400">الحالة الحالية</p>
+                    <p className="mt-4 text-3xl font-semibold text-white">
+                      {isEnabled === null ? "جارٍ التحميل..." : isEnabled ? "مفعل" : "معطل"}
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-[28px] bg-slate-950/80 border border-white/10">
+                    <p className="text-sm text-slate-400">الوضع</p>
+                    <p className="mt-4 text-lg font-medium text-slate-200">
+                      {isEnabled === null
+                        ? "انتظر تحديث الحالة"
+                        : isEnabled
+                        ? "تسمح بإعجابات متعددة"
+                        : "يسمح بإعجاب واحد فقط"}
+                    </p>
+                  </div>
+                </div>
 
-            {/* Toggle Button */}
-            <button
-              onClick={handleToggle}
-              disabled={saving}
-              className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
-                isEnabled
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "bg-green-500 hover:bg-green-600 text-white"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {saving ? "جاري التحديث..." : isEnabled ? "تعطيل Multiple Likes" : "تفعيل Multiple Likes"}
-            </button>
+                <button
+                  onClick={handleToggle}
+                  disabled={saving || isEnabled === null}
+                  className={`w-full rounded-3xl px-6 py-4 text-lg font-semibold transition-all ${
+                    isEnabled
+                      ? "bg-red-500 hover:bg-red-600"
+                      : "bg-green-500 hover:bg-green-600"
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  {saving
+                    ? "جاري التحديث..."
+                    : isEnabled
+                    ? "تعطيل Multiple Likes"
+                    : "تفعيل Multiple Likes"}
+                </button>
+              </div>
+            </section>
 
-            {/* Info Box */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-900">
-                <strong>ملاحظة:</strong> عند التفعيل، سيتمكن المستخدمون من:
-              </p>
-              <ul className="list-disc list-inside text-sm text-blue-900 mt-2 space-y-1">
-                <li>عمل إعجابات متعددة على نفس المنشور</li>
-                <li>الاحتفاظ بالإعجابات بعد تحديث الصفحة</li>
-                <li>الاحتفاظ بالإعجابات بعد تسجيل الدخول والخروج</li>
-              </ul>
-            </div>
+            <aside className="space-y-6">
+              <div className="glass-card p-7 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+                <h2 className="text-2xl font-semibold text-white">معلومات السلوك</h2>
+                <ul className="mt-5 space-y-3 text-slate-300 text-sm leading-7 list-disc list-inside">
+                  <li>عند التفعيل: سيتم الاستمرار في قبول عدة إعجابات من نفس المستخدم على نفس المنشور.</li>
+                  <li>عند التعطيل: يسمح إعجاب واحد فقط لكل منشور ووضع المستخدم لا يتغير.</li>
+                  <li>يتم حفظ الإعجابات بعد تحديث الصفحة وتسجيل الدخول والخروج.</li>
+                  <li>إذا لم تُعرض الحالة مباشرة، قم بتحديث الصفحة مرة واحدة.</li>
+                </ul>
+              </div>
+
+              <div className="glass-card p-7 border border-white/10 shadow-[0_30px_80px_rgba(0,0,0,0.18)]">
+                <h2 className="text-2xl font-semibold text-white">روابط مهمة</h2>
+                <div className="mt-5 space-y-3 text-slate-300 text-sm leading-7">
+                  <div className="rounded-3xl bg-slate-950/80 p-4 border border-white/10">
+                    <p className="font-semibold text-white">رابط إدارة اللايكات</p>
+                    <p className="text-slate-400 text-xs mt-1">/admin-settings/multiple-likes</p>
+                  </div>
+                  <div className="rounded-3xl bg-slate-950/80 p-4 border border-white/10">
+                    <p className="font-semibold text-white">رابط دخول الأدمن</p>
+                    <p className="text-slate-400 text-xs mt-1">/admin-secret-access</p>
+                  </div>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 }

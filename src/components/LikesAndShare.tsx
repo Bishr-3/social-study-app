@@ -12,6 +12,7 @@ interface Props {
 export default function LikesAndShare({ postId, initialLikes }: Props) {
   const [likes, setLikes] = useState(initialLikes);
   const [liked, setLiked] = useState(false);
+  const [allowMultipleLikes, setAllowMultipleLikes] = useState(false);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const { isAdmin } = useAdminStatus();
@@ -25,6 +26,7 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
         if (data.liked) {
           setLiked(true);
         }
+        setAllowMultipleLikes(Boolean(data.allowMultipleLikes));
       } catch (error) {
         console.error("Failed to load like status:", error);
       }
@@ -32,14 +34,14 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
 
     fetchLikedStatus();
 
-    // Re-validate likes every 30 seconds to prevent tampering
+    // Re-validate likes every 30 seconds to prevent stale state.
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`/api/posts/like?postId=${postId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setLiked(data.liked);
-        }
+        if (!res.ok) return;
+        const data = await res.json();
+        setLiked(data.liked);
+        setAllowMultipleLikes(Boolean(data.allowMultipleLikes));
       } catch (error) {
         console.error("Periodic like validation failed:", error);
       }
@@ -49,10 +51,9 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
   }, [postId]);
 
   async function handleLike() {
-    if (loading || liked) return;
+    if (loading || (liked && !allowMultipleLikes)) return;
 
     setLoading(true);
-
     try {
       const res = await fetch("/api/posts/like", {
         method: "POST",
@@ -61,6 +62,7 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
       });
 
       const data = await res.json();
+      setAllowMultipleLikes(Boolean(data.allowMultipleLikes));
 
       if (res.ok) {
         setLiked(true);
@@ -79,15 +81,11 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
     if (loading || !isAdmin) return;
 
     setLoading(true);
-
     try {
       const res = await fetch("/api/posts/like", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId,
-          action: "decrement",
-        }),
+        body: JSON.stringify({ postId, action: "decrement" }),
       });
 
       if (res.ok) {
@@ -112,16 +110,13 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
       <div className="flex items-center gap-1">
         <button
           onClick={handleLike}
-          disabled={loading || liked}
+          disabled={loading || (liked && !allowMultipleLikes)}
           className={`interaction-item ${liked ? "liked" : ""} ${
             loading ? "opacity-50" : ""
           }`}
-          title={liked ? "تم الإعجاب" : "إعجاب"}
+          title={liked ? (allowMultipleLikes ? "إعجاب مرة أخرى" : "تم الإعجاب") : "إعجاب"}
         >
-          <Heart
-            size={20}
-            fill={liked ? "var(--uae-red)" : "none"}
-          />
+          <Heart size={20} fill={liked ? "var(--uae-red)" : "none"} />
           <span>{likes}</span>
         </button>
 
@@ -140,11 +135,7 @@ export default function LikesAndShare({ postId, initialLikes }: Props) {
 
       {/* SHARE BUTTON */}
       <button onClick={handleShare} className="interaction-item">
-        {copied ? (
-          <Check size={20} color="var(--uae-green)" />
-        ) : (
-          <Share2 size={20} />
-        )}
+        {copied ? <Check size={20} color="var(--uae-green)" /> : <Share2 size={20} />}
         <span
           style={{
             color: copied ? "var(--uae-green)" : "inherit",

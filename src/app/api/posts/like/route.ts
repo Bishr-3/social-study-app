@@ -87,14 +87,19 @@ export async function POST(request: Request) {
     }
 
     // 2. Check if multiple likes are allowed
+    let allowMultipleLikes = false;
     if (action === "increment") {
-      const { data: allowMultipleLikes, error: settingError } = await supabaseAdmin.rpc("get_app_setting", {
+      const { data: allowMultipleLikesRaw, error: settingError } = await supabaseAdmin.rpc("get_app_setting", {
         p_setting_key: "allow_multiple_likes"
       });
 
       if (settingError) {
         console.error("Error checking multiple likes setting:", settingError);
       }
+
+      allowMultipleLikes = Array.isArray(allowMultipleLikesRaw)
+        ? Boolean(allowMultipleLikesRaw[0])
+        : Boolean(allowMultipleLikesRaw);
 
       // If multiple likes are NOT allowed, check for duplicates
       if (!allowMultipleLikes) {
@@ -106,7 +111,7 @@ export async function POST(request: Request) {
         if (likeError) throw likeError;
 
         if (likeResult === "ALREADY_LIKED") {
-          const response = NextResponse.json({ error: "ALREADY_LIKED" }, { status: 409 });
+          const response = NextResponse.json({ error: "ALREADY_LIKED", allowMultipleLikes });
           attachLikeCookie(response, cookieStore, likeClientId);
           return response;
         }
@@ -185,14 +190,22 @@ export async function GET(request: Request) {
     .eq("user_hash", user_hash)
     .maybeSingle();
 
+  const { data: allowMultipleLikesRaw } = await supabaseAdmin.rpc("get_app_setting", {
+    p_setting_key: "allow_multiple_likes"
+  });
+
+  const allowMultipleLikes = Array.isArray(allowMultipleLikesRaw)
+    ? Boolean(allowMultipleLikesRaw[0])
+    : Boolean(allowMultipleLikesRaw);
+
   if (error) {
     console.error("Like status lookup failed:", error);
-    const response = NextResponse.json({ liked: false });
+    const response = NextResponse.json({ liked: false, allowMultipleLikes });
     attachLikeCookie(response, cookieStore, likeClientId);
     return response;
   }
 
-  const response = NextResponse.json({ liked: Boolean(data) });
+  const response = NextResponse.json({ liked: Boolean(data), allowMultipleLikes });
   attachLikeCookie(response, cookieStore, likeClientId);
   return response;
 }

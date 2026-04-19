@@ -24,7 +24,7 @@ BEGIN
     LIMIT 1
   );
 END;
-$$ LANGUAGE plpgsql IMMUTABLE;
+$$ LANGUAGE plpgsql STABLE;
 
 -- إنشاء RPC function لتحديث إعدادات التطبيق
 CREATE OR REPLACE FUNCTION update_app_setting(p_setting_key TEXT, p_setting_value BOOLEAN, p_updated_by TEXT)
@@ -38,7 +38,7 @@ BEGIN
   
   RETURN true;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- تفعيل RLS
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
