@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS app_settings (
   setting_value BOOLEAN NOT NULL DEFAULT false,
   description TEXT,
   last_updated_by TEXT,
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- إدراج setting للـ multiple likes (معطل افتراضياً)
@@ -16,19 +16,17 @@ ON CONFLICT (setting_key) DO NOTHING;
 -- إنشاء RPC function للحصول على إعدادات التطبيق
 CREATE OR REPLACE FUNCTION get_app_setting(p_setting_key TEXT)
 RETURNS BOOLEAN AS $$
-DECLARE
-  v_setting_value BOOLEAN;
 BEGIN
-  SELECT setting_value INTO v_setting_value
-  FROM app_settings
-  WHERE setting_key = p_setting_key
-  LIMIT 1;
-  
-  RETURN COALESCE(v_setting_value, false);
+  RETURN (
+    SELECT setting_value
+    FROM app_settings
+    WHERE setting_key = p_setting_key
+    LIMIT 1
+  );
 END;
-$$ LANGUAGE plpgsql STABLE;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
--- إنشاء RPC function لتحديث إعدادات التطبيق (للـ admin فقط)
+-- إنشاء RPC function لتحديث إعدادات التطبيق
 CREATE OR REPLACE FUNCTION update_app_setting(p_setting_key TEXT, p_setting_value BOOLEAN, p_updated_by TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -42,19 +40,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- إضافة RLS Policy للـ app_settings (العرض للكل، التحديث للـ admin فقط)
+-- تفعيل RLS
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
 
+-- حذف السياسات القديمة إن وجدت
 DROP POLICY IF EXISTS "View app settings" ON app_settings;
 DROP POLICY IF EXISTS "Update app settings" ON app_settings;
 
+-- السياسة الأولى: الجميع يمكنهم عرض الإعدادات
 CREATE POLICY "View app settings" ON app_settings
   FOR SELECT USING (true);
 
+-- السياسة الثانية: المصرح فقط يمكنه التحديث (عبر الـ RPC function من الـ API)
 CREATE POLICY "Update app settings" ON app_settings
-  FOR UPDATE USING (auth.uid() IS NOT NULL) -- يمكنك تحديث هذا لـ admin verification
-  WITH CHECK (auth.uid() IS NOT NULL);
+  FOR UPDATE USING (false) WITH CHECK (false);
 
--- Grant permissions
+-- منح الصلاحيات
 GRANT SELECT ON app_settings TO anon, authenticated;
-GRANT UPDATE ON app_settings TO authenticated;
+GRANT EXECUTE ON FUNCTION get_app_setting(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION update_app_setting(TEXT, BOOLEAN, TEXT) TO authenticated;
