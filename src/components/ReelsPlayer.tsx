@@ -22,7 +22,7 @@ export default function ReelsPlayer({ posts, initialIndex, onClose }: ReelsPlaye
   const touchStartY = useRef(0);
   const [likeCount, setLikeCount] = useState(0);
 
-  const videoPosts = posts.filter(p => p.category === "video");
+  const videoPosts = posts.filter(p => p.category === "video" && p.video_url);
   const post = videoPosts[currentIndex];
 
   // Initialize like count
@@ -105,7 +105,27 @@ export default function ReelsPlayer({ posts, initialIndex, onClose }: ReelsPlaye
     }
   };
 
-  if (!post) return null;
+  if (!post || !post.video_url) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[1000] bg-black flex items-center justify-center overflow-hidden"
+      >
+        <div className="text-white text-center p-8">
+          <h2 className="text-2xl font-bold mb-4">لا توجد فيديوهات متاحة</h2>
+          <p className="mb-6">لم يتم العثور على فيديوهات للعرض</p>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 bg-uae-gold text-black rounded-lg font-semibold hover:bg-opacity-80 transition-colors"
+          >
+            إغلاق
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

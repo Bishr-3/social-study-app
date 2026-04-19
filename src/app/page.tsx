@@ -227,8 +227,11 @@ export default function HomePage() {
       <section className="reels-entry-section">
         <button 
           onClick={() => {
-            const index = posts.findIndex(p => p.category === "video");
-            if (index !== -1) setActiveReelIndex(index);
+            const videoPosts = posts.filter(p => p.category === "video" && p.video_url);
+            if (videoPosts.length > 0) {
+              const index = posts.findIndex(p => p.id === videoPosts[0].id);
+              setActiveReelIndex(index);
+            }
           }}
           className="btn-primary reels-btn" 
         >
