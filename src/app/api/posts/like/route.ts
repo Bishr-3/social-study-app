@@ -101,8 +101,9 @@ export async function POST(request: Request) {
         ? Boolean(allowMultipleLikesRaw[0])
         : Boolean(allowMultipleLikesRaw);
 
-      // If multiple likes are NOT allowed, check for duplicates
+      // Use appropriate RPC function based on setting
       if (!allowMultipleLikes) {
+        // Single like mode: use like_post (with UNIQUE constraint check)
         const { data: likeResult, error: likeError } = await supabaseAdmin.rpc("like_post", {
           p_post_id: postId,
           p_user_hash: user_hash
@@ -116,17 +117,13 @@ export async function POST(request: Request) {
           return response;
         }
       } else {
-        // Multiple likes allowed: just insert directly
-        const { error: insertError } = await supabaseAdmin
-          .from("post_likes")
-          .insert({
-            post_id: postId,
-            user_hash: user_hash
-          });
+        // Multiple likes mode: use add_multiple_like (no constraint check)
+        const { data: likeResult, error: likeError } = await supabaseAdmin.rpc("add_multiple_like", {
+          p_post_id: postId,
+          p_user_hash: user_hash
+        });
 
-        if (insertError && !insertError.message.includes("duplicate")) {
-          throw insertError;
-        }
+        if (likeError) throw likeError;
       }
     }
     
