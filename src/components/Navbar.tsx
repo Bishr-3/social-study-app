@@ -34,12 +34,17 @@ export default function Navbar() {
           ✨ شارك الآن
         </Link>
         {isAdmin && (
-          <button 
-            onClick={handleLogout} 
-            className="btn-secondary logout-btn" 
-          >
-            🛡️ خروج
-          </button>
+          <>
+            <Link href="/admin-settings/multiple-likes" className="btn-primary nav-btn" style={{ background: "linear-gradient(135deg, var(--uae-gold), var(--uae-red))" }}>
+              ⚙️ إدارة اللايكات
+            </Link>
+            <button 
+              onClick={handleLogout} 
+              className="btn-secondary logout-btn" 
+            >
+              🛡️ خروج
+            </button>
+          </>
         )}
       </div>
     </nav>

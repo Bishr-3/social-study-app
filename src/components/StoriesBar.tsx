@@ -9,10 +9,8 @@ interface StoriesBarProps {
 }
 
 export default function StoriesBar({ posts, onSelectPost }: StoriesBarProps) {
-  // Take the 8 most recent posts with images or videos
-  const storyPosts = posts
-    .filter(p => p.image_url || p.video_url)
-    .slice(0, 10);
+  // Take the 10 most recent posts (with or without images)
+  const storyPosts = posts.slice(0, 10);
 
   return (
     <div className="stories-bar-container" style={{
@@ -51,13 +49,13 @@ export default function StoriesBar({ posts, onSelectPost }: StoriesBarProps) {
               borderRadius: "50%",
               border: "3px solid var(--bg-primary)",
               overflow: "hidden",
-              background: "var(--glass-bg)"
+              background: "linear-gradient(135deg, rgba(206, 17, 38, 0.1), rgba(0, 115, 47, 0.1))"
             }}>
               {post.image_url ? (
                 <img src={post.image_url} alt={post.student_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem" }}>
-                  🎥
+                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.8rem" }}>
+                  {post.category === "video" ? "🎥" : post.category === "design" ? "🎨" : post.category === "poem" ? "✍️" : post.category === "story" ? "📖" : post.category === "powerpoint" ? "📊" : "🌟"}
                 </div>
               )}
             </div>
