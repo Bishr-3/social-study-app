@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+
+function getRoleFromCookie() {
+  if (typeof document === "undefined") return null;
+  const roleCookie = document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith("user_role="));
+
+  return roleCookie ? roleCookie.split("=")[1] : null;
+}
 
 export function useAdminStatus() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checking, setChecking] = useState(true);
-  const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(() => getRoleFromCookie() === "admin");
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    setChecking(true);
-    fetch("/api/admin/check")
-      .then((r) => r.json())
-      .then((d) => setIsAdmin(d.isAdmin === true))
-      .catch(() => setIsAdmin(false))
-      .finally(() => setChecking(false));
-  }, [pathname]);
+    setIsAdmin(getRoleFromCookie() === "admin");
+  }, []);
 
   return { isAdmin, checking };
 }

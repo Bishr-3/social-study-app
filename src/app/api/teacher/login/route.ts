@@ -12,6 +12,12 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 1 week
     });
+    cookieStore.set("user_role", "teacher", {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
     return NextResponse.json({ success: true });
   }
 

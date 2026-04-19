@@ -19,8 +19,17 @@ export async function POST(req: Request) {
   cookieStore.set("admin_token", process.env.ADMIN_SECRET_TOKEN!, {
     httpOnly: true,       // لا يمكن لـ JavaScript قراءتها
     secure: true,         // HTTPS فقط
-    sameSite: "strict",   // حماية CSRF
+    sameSite: "strict",  // حماية CSRF
     maxAge: 60 * 60 * 24 * 3, // 3 أيام
+    path: "/",
+  });
+
+  // Set a readable role cookie for client-side UI state only.
+  cookieStore.set("user_role", "admin", {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 60 * 60 * 24 * 3,
     path: "/",
   });
 

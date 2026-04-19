@@ -6,6 +6,16 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Particles from "@/components/Particles";
 
+function getRoleFromCookie() {
+  if (typeof document === "undefined") return null;
+  const roleCookie = document.cookie
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith("user_role="));
+
+  return roleCookie ? roleCookie.split("=")[1] : null;
+}
+
 export default function MultipleLikesSettings() {
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -14,35 +24,15 @@ export default function MultipleLikesSettings() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      try {
-        const response = await fetch("/api/admin/check", {
-          method: "GET",
-          credentials: "include"
-        });
+    const role = getRoleFromCookie();
+    if (role !== "admin") {
+      toast.error("❌ هذه الصفحة للـ Admin فقط!");
+      router.push("/");
+      return;
+    }
 
-        if (!response.ok) {
-          toast.error("❌ هذه الصفحة للـ Admin فقط!");
-          router.push("/");
-          return;
-        }
-
-        const data = await response.json();
-        if (!data.isAdmin) {
-          toast.error("❌ هذه الصفحة للـ Admin فقط!");
-          router.push("/");
-          return;
-        }
-
-        setIsAdmin(true);
-        fetchSetting();
-      } catch (error) {
-        console.error(error);
-        router.push("/");
-      }
-    };
-
-    checkAdminStatus();
+    setIsAdmin(true);
+    fetchSetting();
   }, [router]);
 
   const fetchSetting = async () => {
