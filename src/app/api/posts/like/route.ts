@@ -86,19 +86,42 @@ export async function POST(request: Request) {
       return response;
     }
 
-    // 2. Prevent duplicate likes using the new like_post function
+    // 2. Check if multiple likes are allowed
     if (action === "increment") {
-      const { data: likeResult, error: likeError } = await supabaseAdmin.rpc("like_post", {
-        p_post_id: postId,
-        p_user_hash: user_hash
+      const { data: allowMultipleLikes, error: settingError } = await supabaseAdmin.rpc("get_app_setting", {
+        p_setting_key: "allow_multiple_likes"
       });
 
-      if (likeError) throw likeError;
+      if (settingError) {
+        console.error("Error checking multiple likes setting:", settingError);
+      }
 
-      if (likeResult === "ALREADY_LIKED") {
-        const response = NextResponse.json({ error: "ALREADY_LIKED" }, { status: 409 });
-        attachLikeCookie(response, cookieStore, likeClientId);
-        return response;
+      // If multiple likes are NOT allowed, check for duplicates
+      if (!allowMultipleLikes) {
+        const { data: likeResult, error: likeError } = await supabaseAdmin.rpc("like_post", {
+          p_post_id: postId,
+          p_user_hash: user_hash
+        });
+
+        if (likeError) throw likeError;
+
+        if (likeResult === "ALREADY_LIKED") {
+          const response = NextResponse.json({ error: "ALREADY_LIKED" }, { status: 409 });
+          attachLikeCookie(response, cookieStore, likeClientId);
+          return response;
+        }
+      } else {
+        // Multiple likes allowed: just insert directly
+        const { error: insertError } = await supabaseAdmin
+          .from("post_likes")
+          .insert({
+            post_id: postId,
+            user_hash: user_hash
+          });
+
+        if (insertError && !insertError.message.includes("duplicate")) {
+          throw insertError;
+        }
       }
     }
     
