@@ -69,24 +69,28 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ALTER TABLE public.post_likes_audit ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
 
--- 7. Drop old policies
+-- 7. Drop old policies - ALL of them
 DROP POLICY IF EXISTS "Allow public read access on likes audit" ON public.post_likes_audit;
 DROP POLICY IF EXISTS "Allow public read access on post likes" ON public.post_likes;
 DROP POLICY IF EXISTS "Allow anon insert likes" ON public.post_likes_audit;
 DROP POLICY IF EXISTS "Allow anon insert post likes" ON public.post_likes;
+DROP POLICY IF EXISTS "Allow public read on post_likes_audit" ON public.post_likes_audit;
+DROP POLICY IF EXISTS "Allow public insert on post_likes_audit" ON public.post_likes_audit;
+DROP POLICY IF EXISTS "Allow public read on post_likes" ON public.post_likes;
+DROP POLICY IF EXISTS "Allow public insert on post_likes" ON public.post_likes;
 
 -- 8. Create policies for post_likes_audit
-CREATE POLICY "Allow public read on post_likes_audit" ON public.post_likes_audit
+CREATE POLICY "Allow public read audit" ON public.post_likes_audit
   FOR SELECT USING (true);
 
-CREATE POLICY "Allow public insert on post_likes_audit" ON public.post_likes_audit
+CREATE POLICY "Allow public insert audit" ON public.post_likes_audit
   FOR INSERT WITH CHECK (true);
 
 -- 9. Create policies for post_likes
-CREATE POLICY "Allow public read on post_likes" ON public.post_likes
+CREATE POLICY "Allow public read likes" ON public.post_likes
   FOR SELECT USING (true);
 
-CREATE POLICY "Allow public insert on post_likes" ON public.post_likes
+CREATE POLICY "Allow public insert likes" ON public.post_likes
   FOR INSERT WITH CHECK (true);
 
 -- 10. Grant permissions

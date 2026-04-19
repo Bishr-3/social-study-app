@@ -32,7 +32,6 @@ export default function PostCard({ post }: { post: Post }) {
   const cat = categoryLabels[post.category] || categoryLabels.free;
   const [likes, setLikes] = useState(post.likes || 0);
   const [liked, setLiked] = useState(false);
-  const [allowMultipleLikes, setAllowMultipleLikes] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [rating, setRating] = useState(post.teacher_rating || 0);
   const [isChoice, setIsChoice] = useState(post.is_teacher_choice || false);
@@ -53,7 +52,6 @@ export default function PostCard({ post }: { post: Post }) {
         if (data.liked) {
           setLiked(true);
         }
-        setAllowMultipleLikes(Boolean(data.allowMultipleLikes));
       } catch (error) {
         console.error("Failed to check liked status:", error);
       }
@@ -68,7 +66,6 @@ export default function PostCard({ post }: { post: Post }) {
         if (res.ok) {
           const data = await res.json();
           setLiked(data.liked);
-          setAllowMultipleLikes(Boolean(data.allowMultipleLikes));
         }
         // Also re-fetch post data to ensure likes count is accurate
         // This would require passing a refresh function or using a global state
@@ -82,7 +79,7 @@ export default function PostCard({ post }: { post: Post }) {
 
   async function handleLike(e: React.MouseEvent) {
     e.preventDefault();
-    if (liked && !allowMultipleLikes) return;
+    if (liked) return;
 
     try {
       const res = await fetch("/api/posts/like", {
@@ -106,7 +103,6 @@ export default function PostCard({ post }: { post: Post }) {
         setLikes(prev => prev + 1);
       } else if (data.error === "ALREADY_LIKED") {
         setLiked(true);
-        setAllowMultipleLikes(Boolean(data.allowMultipleLikes));
         const likedPosts = JSON.parse(localStorage.getItem("liked_posts") || "[]");
         if (!likedPosts.includes(post.id)) {
           likedPosts.push(post.id);
