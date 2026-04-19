@@ -1,38 +1,64 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 export default function MultipleLikesSettings() {
   const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const router = useRouter();
 
-  // Fetch current setting
+  // Check admin status on mount
   useEffect(() => {
-    const fetchSetting = async () => {
+    const checkAdminStatus = async () => {
       try {
-        const response = await fetch("/api/admin/settings/multiple-likes", {
-          method: "GET",
+        const response = await fetch("/api/admin/check", {
+          method: "POST",
           credentials: "include"
         });
 
         if (!response.ok) {
-          throw new Error("فشل الحصول على الإعدادات");
+          // ليس admin - إعادة للصفحة الرئيسية
+          toast.error("❌ هذه الصفحة للـ Admin فقط!");
+          router.push("/");
+          return;
         }
 
-        const data = await response.json();
-        setIsEnabled(data.enabled);
+        setIsAdmin(true);
+        fetchSetting();
       } catch (error) {
-        toast.error((error as Error).message);
         console.error(error);
-      } finally {
-        setLoading(false);
+        router.push("/");
       }
     };
 
-    fetchSetting();
-  }, []);
+    checkAdminStatus();
+  }, [router]);
+
+  // Fetch current setting
+  const fetchSetting = async () => {
+    try {
+      const response = await fetch("/api/admin/settings/multiple-likes", {
+        method: "GET",
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error("فشل الحصول على الإعدادات");
+      }
+
+      const data = await response.json();
+      setIsEnabled(data.enabled);
+    } catch (error) {
+      toast.error((error as Error).message);
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Toggle setting
   const handleToggle = async () => {
@@ -60,6 +86,16 @@ export default function MultipleLikesSettings() {
       setSaving(false);
     }
   };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-uae-red/10 to-uae-gold/10 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 text-lg">جاري التحقق من الصلاحيات...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

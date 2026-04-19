@@ -6,10 +6,11 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
     const adminToken = cookieStore.get("admin_token")?.value;
+    const expectedToken = process.env.ADMIN_SECRET_TOKEN;
     
-    // Check admin authorization
-    if (adminToken !== "valid-admin-token") {
-      return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 403 });
+    // Check admin authorization - يجب أن تكون admin_token صحيحة
+    if (!adminToken || !expectedToken || adminToken !== expectedToken) {
+      return NextResponse.json({ error: "UNAUTHORIZED - Admin access required" }, { status: 403 });
     }
 
     // Get current multiple likes setting
@@ -35,10 +36,11 @@ export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
     const adminToken = cookieStore.get("admin_token")?.value;
+    const expectedToken = process.env.ADMIN_SECRET_TOKEN;
     
-    // Check admin authorization
-    if (adminToken !== "valid-admin-token") {
-      return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 403 });
+    // Check admin authorization - يجب أن تكون admin_token صحيحة
+    if (!adminToken || !expectedToken || adminToken !== expectedToken) {
+      return NextResponse.json({ error: "UNAUTHORIZED - Admin access required" }, { status: 403 });
     }
 
     const { enable } = await request.json() as { enable: boolean };
